@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Correio do Amor</title>
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💌</text></svg>">
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Correio">
+  <link rel="apple-touch-icon" href="icone.png">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <button class="close-box-btn" id="close-box-btn" onclick="closeMailbox()">Fechar Caixa 📂</button>
+    
+    <div class="scene" id="scene">
+      <div class="mailbox-camera-control" id="mailbox" onclick="handleMailboxClick(event)">
+        <div class="mailbox-tunnel-body">
+          <div class="mailbox-interior-shadow"></div>
+          <div class="mailbox-flag-stick">
+            <div class="mailbox-flag-cloth"></div>
+          </div>
+        </div>
+        <div class="mailbox-door-front" id="mailbox-door">
+          <div class="mailbox-door-handle"></div>
+          <div class="mailbox-door-text">CORREIO DO AMOR</div>
+        </div>
+        <div class="letters-inside-box" id="letters-inside">
+          <div class="mini-envelope-physical env-1"><div class="flap-triangle"></div></div>
+          <div class="mini-envelope-physical env-2"><div class="flap-triangle"></div></div>
+          <div class="mini-envelope-physical env-3"><div class="flap-triangle"></div></div>
+        </div>
+        <div class="mailbox-wood-pole"><div class="wood-grain-line"></div></div>
+        <div class="mailbox-grass-base">
+          <div class="grass-blade g1"></div><div class="grass-blade g2"></div><div class="grass-blade g3"></div>
+        </div>
+        <div class="magic-particles">
+          <div class="particle p1"></div>
+          <div class="particle p2"></div>
+          <div class="particle p3"></div>
+          <div class="particle p4"></div>
+          <div class="particle p5"></div>
+          <div class="particle p6"></div>
+        </div>
+        
+      </div>
+      <div class="click-prompt" id="prompt">Clique na Caixa de Correio para Abrir 📬</div>
+    </div>
+
+    <div class="main-interface" id="main-interface">
+      <nav class="tabs-menu">
+        <button class="tab-btn active" id="btn-novas" onclick="switchTab('novas')">
+          <div class="tab-btn-content">
+            <span>Novas Cartas</span>
+            <span class="notification-badge" id="notif-badge"></span>
+          </div>
+        </button>
+        <button class="tab-btn" id="btn-lidas" onclick="switchTab('lidas')">Lidas</button>
+        <button class="tab-btn" id="btn-escrever" onclick="switchTab('escrever')">Escrever Carta</button>
+        <button class="tab-btn" id="btn-enviadas" onclick="switchTab('enviadas')">Enviadas</button>
+      </nav>
+
+      <section id="tab-novas" class="tab-content active">
+        <div class="deck-container"><div id="envelope-display"></div></div>
+      </section>
+      
+      <section id="tab-lidas" class="tab-content">
+        <h2>Suas Memórias Guardadas 📁</h2>
+        <div class="archive-grid" id="lidas-display"></div>
+      </section>
+      
+      <section id="tab-escrever" class="tab-content">
+        <h2>Mande uma carta de volta ✏️</h2>
+        <div class="write-box">
+          <div class="input-group">
+            <label>Título da Carta:</label>
+            <input type="text" id="letter-title" placeholder="Ex: Sobre o nosso dia...">
+          </div>
+          <div class="input-group">
+            <label>Remetente:</label>
+            <input type="text" id="sender-name" placeholder="Seu nome...">
+          </div>
+          <div class="input-group">
+            <label>Destinatário:</label>
+            <input type="text" id="recipient-name" placeholder="Para quem...">
+          </div>
+          <div class="input-group">
+            <label>Mensagem:</label>
+            <textarea id="write-text" placeholder="Escreva aqui..."></textarea>
+          </div>
+          <button class="action-btn" onclick="sendLetter()">Enviar para a Caixa 🚀</button>
+        </div>
+      </section>
+      
+      <section id="tab-enviadas" class="tab-content">
+        <h2>Suas Cartas Enviadas 📮</h2>
+        <div class="archive-grid" id="enviadas-display"></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="letter-overlay" id="letter-overlay">
+    <div class="paper-container">
+      <span class="close-letter-btn" onclick="closeLetterModal()">&times;</span>
+      <div class="paper" id="paper-content"></div>
+      <div id="modal-actions-container" style="margin-top: 15px;"></div>
+    </div>
+  </div>
+
+  <audio id="bg-music" loop preload="auto">
+    <source src="https://cdn.jsdelivr.net/gh/Akzo777/Correio-do-Amor/Heaven.mp3" type="audio/mpeg">
+  </audio>
+  <button id="music-control" class="music-btn" onclick="toggleMusic()">🔊</button>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
