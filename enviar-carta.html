@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel do Correio</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Nunito:wght@400;600;700&display=swap');
+        
+        body { font-family: 'Nunito', sans-serif; background: #F2E1FF; display: flex; justify-content: center; padding: 40px; margin: 0; color: #140F4B; }
+        .admin-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 500px; border-top: 6px solid #6961D7; }
+        h2 { text-align: center; margin-top: 0; color: #393199; }
+        .input-group { margin-bottom: 15px; display: flex; flex-direction: column; }
+        label { font-size: 13px; font-weight: bold; color: #554DBE; margin-bottom: 5px; }
+        input, textarea { width: 100%; padding: 12px; border: 2px solid #C3AEFF; border-radius: 8px; font-family: inherit; font-size: 14px; outline: none; box-sizing: border-box;}
+        input:focus, textarea:focus { border-color: #6961D7; }
+        textarea { height: 120px; resize: none; }
+        
+        .btn-primary { background: #6961D7; color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase; width: 100%; transition: 0.2s; }
+        .btn-primary:hover { background: #393199; }
+        .btn-secondary { background: #C3AEFF; color: #140F4B; border: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase; width: 100%; margin-top: 10px; transition: 0.2s; }
+        .btn-secondary:hover { background: #A78AFB; }
+        
+        /* --- ESTILOS DO MENU NOTION --- */
+        .emoji-selector-container { position: relative; }
+        .emoji-btn { background: #F2E1FF; border: 2px solid #C3AEFF; border-radius: 8px; font-size: 26px; cursor: pointer; width: 100%; height: 45px; display: flex; justify-content: center; align-items: center; transition: 0.2s; color: #140F4B;}
+        .emoji-btn:hover { border-color: #6961D7; background: #DDC8FF; }
+        
+        .custom-picker-wrapper { position: absolute; z-index: 1000; margin-top: 5px; left: 0; background: white; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid #C3AEFF; width: 310px; overflow: hidden; display: none; }
+        
+        .picker-tabs { display: flex; border-bottom: 1px solid #E0E0E0; background: #F9F9F9; }
+        .picker-tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 13px; font-weight: bold; color: #666; transition: 0.2s; border-bottom: 2px solid transparent; }
+        .picker-tab:hover { color: #6961D7; background: #F2E1FF; }
+        .picker-tab.active { border-bottom: 2px solid #6961D7; color: #393199; background: white; }
+        
+        #tab-emojis { display: block; }
+        #tab-icones { display: none; padding: 10px; background: white; }
+        
+        /* BARRA DE PESQUISA DE ÍCONES */
+        .search-icon-input { width: 100%; padding: 8px 12px; border: 1px solid #E0E0E0; border-radius: 6px; font-size: 13px; margin-bottom: 10px; outline: none; background: #F9F9F9; transition: 0.2s; }
+        .search-icon-input:focus { border-color: #6961D7; background: white; }
+        
+        .icons-scroll-area { max-height: 250px; overflow-y: auto; padding-right: 5px; }
+        .icons-scroll-area::-webkit-scrollbar { width: 4px; }
+        .icons-scroll-area::-webkit-scrollbar-thumb { background: #C3AEFF; border-radius: 4px; }
+        
+        .icons-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+        .icon-item { font-size: 20px; text-align: center; cursor: pointer; padding: 8px 0; border-radius: 6px; transition: 0.2s; color: #393199; }
+        .icon-item:hover { background: #F2E1FF; transform: scale(1.1); }
+        .no-results { grid-column: 1 / -1; text-align: center; font-size: 12px; color: #888; padding: 20px 0; }
+
+        emoji-picker { --background: #ffffff; --indicator-color: #6961D7; --button-hover-background: #F2E1FF; --search-focus-border-color: #6961D7; --border-radius: 0; width: 100%; border: none;}
+
+        /* ESTILOS DE PREVIEW */
+        #preview-section { display: none; }
+        .paper { background: #F2E1FF; padding: 30px 20px; border-radius: 8px; border-left: 6px solid #6961D7; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .letter-header { background: #DDC8FF; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #6961D7; }
+        .header-item { margin-bottom: 8px; display: flex; align-items: flex-start; }
+        .header-label { color: #554DBE; font-weight: 800; font-size: 11px; margin-right: 8px; width: 45px; margin-top: 3px; }
+        .header-value { font-size: 14.5px; font-weight: 700; flex: 1; }
+        .letter-body { font-family: 'Lora', serif; font-size: 15px; line-height: 1.8; text-align: justify; }
+        .preview-actions { display: flex; gap: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-box" id="form-section">
+        <h2>💌 Cadastrar Nova Carta</h2>
+        
+        <div style="display:flex; gap:10px;">
+            <div class="input-group" style="flex:1;">
+                <label>Número (ID):</label>
+                <input type="number" id="id_carta" placeholder="Ex: 3">
+            </div>
+            
+            <div class="input-group" style="flex:1;">
+                <label>Selo:</label>
+                <div class="emoji-selector-container">
+                    <button type="button" id="emoji-btn" class="emoji-btn">✨</button>
+                    <input type="hidden" id="selo" value="✨">
+                    
+                    <div id="custom-picker-wrapper" class="custom-picker-wrapper">
+                        <div class="picker-tabs">
+                            <div class="picker-tab active" onclick="switchTabPicker('emojis', event)">Emoji</div>
+                            <div class="picker-tab" onclick="switchTabPicker('icones', event)">Ícones</div>
+                        </div>
+                        
+                        <div id="tab-emojis">
+                            <emoji-picker></emoji-picker>
+                        </div>
+                        
+                        <div id="tab-icones">
+                            <input type="text" id="icon-search" class="search-icon-input" placeholder="Filtrar ícones...">
+                            <div class="icons-scroll-area">
+                                <div class="icons-grid" id="icons-grid"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Remetente:</label>
+            <input type="text" id="remetente" value="Seu Nome 💜">
+        </div>
+
+        <div class="input-group">
+            <label>Destinatário:</label>
+            <input type="text" id="destinatario" value="Para Minha Garota">
+        </div>
+
+        <div class="input-group">
+            <label>Título (Aparece na aba Lidas):</label>
+            <input type="text" id="titulo" placeholder="Ex: Carta 03: Nosso momento">
+        </div>
+
+        <div class="input-group">
+            <label>Mensagem da Carta:</label>
+            <textarea id="texto" placeholder="Escreva o texto aqui..."></textarea>
+        </div>
+
+        <button class="btn-primary" onclick="abrirPreview()">Pré-Visualizar 👀</button>
+    </div>
+
+    <div class="admin-box" id="preview-section">
+        <h2>Modo de Revisão 🔍</h2>
+        <div class="paper">
+            <div class="letter-header">
+                <div class="header-item">
+                    <span class="header-label">DE:</span>
+                    <span class="header-value" id="prev-rem"></span>
+                </div>
+                <div class="header-item">
+                    <span class="header-label">PARA:</span>
+                    <span class="header-value" id="prev-dest"></span>
+                </div>
+            </div>
+            <div class="letter-body" id="prev-body"></div>
+        </div>
+        
+        <div class="preview-actions">
+            <button class="btn-secondary" onclick="voltarEditar()">Voltar</button>
+            <button class="btn-primary" onclick="confirmarEnvio()">Aprovar e Enviar 🚀</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import 'https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const emojiBtn = document.getElementById('emoji-btn');
+        const pickerWrapper = document.getElementById('custom-picker-wrapper');
+        const seloInput = document.getElementById('selo');
+        const picker = document.querySelector('emoji-picker');
+        const searchInput = document.getElementById('icon-search');
+        const grid = document.getElementById('icons-grid');
+
+        // Banco de ícones catalogados com palavras-chave
+        const iconData = [
+            { char: '✦', keys: 'estrela star brilho magic magica' },
+            { char: '✧', keys: 'estrela star brilho vazio' },
+            { char: '★', keys: 'estrela star cheia' },
+            { char: '☆', keys: 'estrela star vazia' },
+            { char: '♡', keys: 'coracao heart amor love vazio' },
+            { char: '♥', keys: 'coracao heart amor love cheio' },
+            { char: '☾', keys: 'lua moon noite night' },
+            { char: '☀', keys: 'sol sun dia luz calor' },
+            { char: '☁', keys: 'nuvem cloud chuva céu' },
+            { char: '☂', keys: 'guarda chuva umbrella chuva' },
+            { char: '☃', keys: 'neve snow boneco frio' },
+            { char: '☄', keys: 'cometa meteoro espaco' },
+            { char: '✂', keys: 'tesoura cut cortar' },
+            { char: '✉', keys: 'carta email correio envelope' },
+            { char: '♪', keys: 'musica nota som music' },
+            { char: '♫', keys: 'musica notas som music dupla' },
+            { char: '♔', keys: 'rei king coroa xadrez' },
+            { char: '♕', keys: 'rainha queen coroa xadrez' },
+            { char: '⚓', keys: 'ancora mar barco navio' },
+            { char: '⚔', keys: 'espada luta guerra sword' },
+            { char: '⚖', keys: 'justica balanca direito' },
+            { char: '⚛', keys: 'atomo ciencia nerd quimica' },
+            { char: '⚠', keys: 'aviso perigo alerta warning' },
+            { char: '⚡', keys: 'raio energia flash relampago' },
+            { char: '❀', keys: 'flor flower primavera' },
+            { char: '✿', keys: 'flor flower cheia' },
+            { char: '❁', keys: 'flor flower detalhe' },
+            { char: '✓', keys: 'check certo ok sim' },
+            { char: '✖', keys: 'x errado cancelar fechar' },
+            { char: '✝', keys: 'cruz religiao deus' },
+            { char: '☕', keys: 'cafe coffee xicara' }
+        ];
+
+        // Função para renderizar a grade de ícones
+        function renderIcons(list) {
+            grid.innerHTML = '';
+            if (list.length === 0) {
+                grid.innerHTML = '<div class="no-results">Nenhum ícone encontrado.</div>';
+                return;
+            }
+            list.forEach(item => {
+                let div = document.createElement('div');
+                div.className = 'icon-item';
+                div.innerText = item.char;
+                div.title = item.keys; // Tooltip ao passar o mouse
+                div.onclick = () => aplicarSelo(item.char);
+                grid.appendChild(div);
+            });
+        }
+
+        // Renderiza todos os ícones ao iniciar
+        renderIcons(iconData);
+
+        // Sistema de busca em tempo real
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase().trim();
+            const filtered = iconData.filter(i => i.keys.includes(term) || i.char === term);
+            renderIcons(filtered);
+        });
+
+        function aplicarSelo(valor) {
+            emojiBtn.innerText = valor;
+            seloInput.value = valor;
+            pickerWrapper.style.display = 'none';
+        }
+
+        window.switchTabPicker = function(tabName, event) {
+            document.getElementById('tab-emojis').style.display = tabName === 'emojis' ? 'block' : 'none';
+            document.getElementById('tab-icones').style.display = tabName === 'icones' ? 'block' : 'none';
+            document.querySelectorAll('.picker-tab').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Foca na barra de pesquisa automaticamente ao abrir a aba
+            if(tabName === 'icones') {
+                setTimeout(() => searchInput.focus(), 50);
+            }
+        };
+
+        emojiBtn.addEventListener('click', () => {
+            pickerWrapper.style.display = pickerWrapper.style.display === 'none' ? 'block' : 'none';
+        });
+
+        picker.addEventListener('emoji-click', event => aplicarSelo(event.detail.unicode));
+
+        document.addEventListener('click', (event) => {
+            if (!emojiBtn.contains(event.target) && !pickerWrapper.contains(event.target)) {
+                pickerWrapper.style.display = 'none';
+            }
+        });
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDhAP2RMQ1TQyLzB1N9hs76AVjfqTjB9Pk",
+            authDomain: "correio-91c8e.firebaseapp.com",
+            databaseURL: "https://correio-91c8e-default-rtdb.firebaseio.com",
+            projectId: "correio-91c8e",
+            storageBucket: "correio-91c8e.firebasestorage.app",
+            messagingSenderId: "40461554553",
+            appId: "1:40461554553:web:92720144d48859c8e215a8",
+            measurementId: "G-VK7BC2QY03"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        
+        let cartaPrevia = {}; 
+        let nodeKey = "";
+
+        window.abrirPreview = function() {
+            const id = document.getElementById('id_carta').value;
+            const selo = document.getElementById('selo').value.trim();
+            const remetente = document.getElementById('remetente').value.trim();
+            const destinatario = document.getElementById('destinatario').value.trim();
+            const titulo = document.getElementById('titulo').value.trim();
+            const texto = document.getElementById('texto').value.trim();
+
+            if(!id || !titulo || !texto) {
+                return alert("Preencha o ID, Título e a Mensagem!");
+            }
+
+            nodeKey = "carta" + id;
+            
+            cartaPrevia = {
+                id: parseInt(id),
+                remetente: remetente,
+                destinatario: destinatario,
+                selo: selo || "💌",
+                titulo: titulo,
+                conteudo: texto.replace(/\n/g, '<br>')
+            };
+
+            document.getElementById('prev-rem').innerText = cartaPrevia.remetente;
+            document.getElementById('prev-dest').innerText = cartaPrevia.destinatario;
+            document.getElementById('prev-body').innerHTML = cartaPrevia.conteudo;
+
+            document.getElementById('form-section').style.display = 'none';
+            document.getElementById('preview-section').style.display = 'block';
+        };
+
+        window.voltarEditar = function() {
+            document.getElementById('form-section').style.display = 'block';
+            document.getElementById('preview-section').style.display = 'none';
+        };
+
+        window.confirmarEnvio = function() {
+            const cartaRef = ref(db, 'correio_dados/cartas_originais/' + nodeKey);
+            
+            set(cartaRef, cartaPrevia).then(() => {
+                alert("Carta enviada com sucesso para o banco de dados!");
+                document.getElementById('titulo').value = "";
+                document.getElementById('texto').value = "";
+                voltarEditar();
+                document.getElementById('id_carta').value = cartaPrevia.id + 1; 
+            }).catch((error) => {
+                alert("Erro ao enviar: " + error.message);
+            });
+        };
+    </script>
+</body>
+</html>
