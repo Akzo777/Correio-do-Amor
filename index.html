@@ -68,7 +68,9 @@
       </nav>
 
       <section id="tab-novas" class="tab-content active">
-        <div class="deck-container"><div id="envelope-display"></div></div>
+        <div class="deck-container">
+            <div id="envelope-display"></div>
+        </div>
       </section>
       
       <section id="tab-lidas" class="tab-content">
@@ -79,10 +81,19 @@
       <section id="tab-escrever" class="tab-content">
         <h2>Mande uma carta de volta ✏️</h2>
         <div class="write-box">
+          
           <div class="input-group">
             <label>Título da Carta:</label>
             <input type="text" id="letter-title" placeholder="Ex: Sobre o nosso dia...">
           </div>
+
+          <!-- NOVO CAMPO: ESCOLHA DE SELO (LIVRE PARA EMOJI) -->
+          <div class="input-group">
+            <label>Selo do Envelope:</label>
+            <input type="text" id="send-selo" placeholder="Insira 1 emoji ✨" maxlength="2" style="width: 100%; text-align: center; font-size: 24px; padding: 10px; border: 2px solid var(--border-color); border-radius: 10px; outline: none; background: white; color: var(--text-dark); transition: 0.2s;">
+            <small style="color: var(--pc6); margin-top: 5px; font-size: 11px; text-align: center;">Use o teclado do seu celular ou Win + . para colocar um emoji</small>
+          </div>
+
           <div class="input-group">
             <label>Remetente:</label>
             <input type="text" id="sender-name" placeholder="Seu nome...">
@@ -111,6 +122,16 @@
       <span class="close-letter-btn" onclick="closeLetterModal()">&times;</span>
       <div class="paper" id="paper-content"></div>
       <div id="modal-actions-container" style="margin-top: 15px;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL DE ALERTA PARA CADEADO -->
+  <div class="alert-overlay" id="custom-alert-modal">
+    <div class="alert-content">
+      <div class="alert-icon" id="alert-icon">⚠️</div>
+      <h2 class="alert-title" id="alert-title">Aviso</h2>
+      <p class="alert-msg" id="alert-message"></p>
+      <button class="action-btn" onclick="closeAlertModal()" style="margin: 0 auto;">Entendi</button>
     </div>
   </div>
 

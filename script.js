@@ -15,6 +15,7 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 let novasCartas = [], cartasLidas = [], cartasEnviadasDela = [], cartaAtualUnica = null;
+let hasPlayedMusic = false;
 
 window.onload = function() { listenToDatabase(); };
 
@@ -96,20 +97,75 @@ window.closeMailbox = function() {
   document.getElementById('close-box-btn').classList.remove('visible');
 }
 
+function formatarData(dataISO) {
+  if (!dataISO) return "";
+  const partes = dataISO.split('-');
+  if(partes.length < 3) return dataISO;
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+window.showCustomAlert = function(title, message, icon = "⚠️") {
+  const alertModal = document.getElementById('custom-alert-modal');
+  if(!alertModal) {
+    alert(title + "\n\n" + message.replace(/<[^>]*>?/gm, ''));
+    return;
+  }
+  document.getElementById('alert-icon').innerText = icon;
+  document.getElementById('alert-title').innerText = title;
+  document.getElementById('alert-message').innerHTML = message;
+  alertModal.classList.add('active');
+}
+
+window.closeAlertModal = function() {
+  const alertModal = document.getElementById('custom-alert-modal');
+  if(alertModal) alertModal.classList.remove('active');
+}
+
 window.renderEnvelope = function() {
   const display = document.getElementById('envelope-display');
+  display.innerHTML = "";
+
   if (novasCartas.length === 0) {
+    display.classList.remove('archive-grid');
     display.innerHTML = `<div class="empty-msg"><p>🎉 Você já leu todas as cartas!</p><small style="color: var(--pc6); font-weight: normal;">Visite a aba "Lidas" para reler quando quiser.</small></div>`;
     return;
   }
-  cartaAtualUnica = novasCartas[0];
-  display.innerHTML = `
-    <div class="envelope" onclick="openLetterContent(true)">
-      <div class="sender">De: ${cartaAtualUnica.remetente}</div>
-      <div class="stamp">${cartaAtualUnica.selo}</div>
-      <div class="recipient">Para: ${cartaAtualUnica.destinatario}<br><br><span style="color:var(--primary); font-size:12px;">👉 Clique para abrir o envelope</span></div>
-    </div>
-  `;
+
+  display.classList.add('archive-grid');
+  
+  const hoje = new Date();
+  hoje.setHours(0,0,0,0);
+
+  const cartasOrdenadas = [...novasCartas].sort((a, b) => new Date(a.data_abertura || 0) - new Date(b.data_abertura || 0));
+
+  cartasOrdenadas.forEach(carta => {
+    let isTrancada = false;
+    if (carta.data_abertura) {
+      const dataAbertura = new Date(carta.data_abertura + "T00:00:00");
+      if (dataAbertura > hoje) isTrancada = true;
+    }
+
+    const card = document.createElement('div');
+    if (isTrancada) {
+      card.className = "mini-envelope locked-envelope";
+      card.onclick = () => showCustomAlert("Selo Mágico Intacto", `Esta carta está viajando pelo tempo e só poderá ser aberta no dia <b>${formatarData(carta.data_abertura)}</b>.<br><br>Controle a ansiedade! 🔒`, "💌");
+      card.innerHTML = `
+        <div style="font-size: 24px; margin-bottom: 5px;">🔒</div>
+        <div>${carta.titulo}</div>
+        <div style="font-size: 10px; color: #FF4B4B; margin-top: 5px;">Abre em: ${formatarData(carta.data_abertura)}</div>
+      `;
+    } else {
+      card.className = "mini-envelope";
+      card.onclick = () => { cartaAtualUnica = carta; openLetterContent(true); };
+      // O SEGREDO ESTÁ AQUI: Usa o selo que você escolheu no painel, ou a carta como padrão
+      card.innerHTML = `
+        <div style="font-size: 24px; margin-bottom: 5px;">${carta.selo || '💌'}</div>
+        <div>${carta.titulo}</div>
+        <div style="font-size: 10px; color: var(--primary); margin-top: 5px;">Nova!</div>
+      `;
+    }
+    display.appendChild(card);
+  });
 }
 
 window.openLetterContent = function(isNewDeck, isSentLetter = false) {
@@ -129,7 +185,7 @@ window.openLetterContent = function(isNewDeck, isSentLetter = false) {
   
   actionsContainer.innerHTML = ''; 
   if (isNewDeck) {
-    actionsContainer.innerHTML = `<button class="action-btn next-btn" onclick="progressLetter()" style="margin: 0 auto;">Próxima Carta ➡️</button>`;
+    actionsContainer.innerHTML = `<button class="action-btn next-btn" onclick="progressLetter()" style="margin: 0 auto;">Marcar como Lida ✅</button>`;
   } else if (isSentLetter) {
     actionsContainer.innerHTML = `
       <div style="display: flex; gap: 10px;">
@@ -139,6 +195,15 @@ window.openLetterContent = function(isNewDeck, isSentLetter = false) {
     `;
   }
   overlay.classList.add('active');
+  
+  if (!hasPlayedMusic && isNewDeck) {
+    const bgMusic = document.getElementById('bg-music');
+    if (bgMusic) {
+      bgMusic.volume = 0.5;
+      bgMusic.play().catch(e => console.log("Música bloqueada pelo navegador", e));
+      hasPlayedMusic = true;
+    }
+  }
 }
 
 window.closeLetterModal = function() {
@@ -157,7 +222,11 @@ window.updateLidasUI = function() {
   cartasLidas.forEach(letter => {
     const mini = document.createElement('div');
     mini.className = "mini-envelope";
-    mini.innerText = letter.titulo;
+    // MANTÉM O SELO ORIGINAL NA ABA DE LIDAS
+    mini.innerHTML = `
+      <div style="font-size: 24px; margin-bottom: 5px;">${letter.selo || '💌'}</div>
+      <div>${letter.titulo}</div>
+    `;
     mini.onclick = () => { cartaAtualUnica = letter; openLetterContent(false); };
     display.appendChild(mini);
   });
@@ -165,6 +234,7 @@ window.updateLidasUI = function() {
 
 window.sendLetter = function() {
   const title = document.getElementById('letter-title').value.trim();
+  let seloEscolhido = document.getElementById('send-selo').value.trim(); // Pega o que ela digitou
   const senderName = document.getElementById('sender-name').value.trim();
   const recipientName = document.getElementById('recipient-name').value.trim();
   const text = document.getElementById('write-text').value.trim();
@@ -173,20 +243,28 @@ window.sendLetter = function() {
     return alert("Por favor, preencha todos os campos, incluindo o Título, antes de enviar!");
   }
   
+  // Trava de segurança: Se ela esquecer o selo, colocamos o padrão.
+  if (!seloEscolhido) {
+    seloEscolhido = "💌";
+  }
+
   const novaCartaDela = {
     id: Date.now(),
     titulo: title,
     remetente: senderName,
     destinatario: recipientName,
-    selo: '💌',
+    selo: seloEscolhido, // Salva o emoji que ela escolheu
     conteudo: text.replace(/\n/g, '<br>')
   };
 
   push(ref(db, 'correio_dados/enviadas'), novaCartaDela).then(() => {
+    // Limpa os campos após o envio
     document.getElementById('letter-title').value = "";
     document.getElementById('sender-name').value = "";
     document.getElementById('recipient-name').value = "";
     document.getElementById('write-text').value = ""; 
+    document.getElementById('send-selo').value = ""; // Limpa o emoji
+    
     switchTab('enviadas');
   }).catch((error) => alert("Erro ao conectar ao servidor: " + error.message));
 }
@@ -199,7 +277,11 @@ window.updateEnviadasUI = function() {
   cartasEnviadasDela.forEach(letter => {
     const mini = document.createElement('div');
     mini.className = "mini-envelope";
-    mini.innerText = letter.titulo;
+    // MANTÉM O SELO ORIGINAL NA ABA DE ENVIADAS
+    mini.innerHTML = `
+      <div style="font-size: 24px; margin-bottom: 5px;">${letter.selo || '💌'}</div>
+      <div>${letter.titulo}</div>
+    `;
     mini.onclick = () => { cartaAtualUnica = letter; openLetterContent(false, true); };
     display.appendChild(mini);
   });
@@ -210,10 +292,12 @@ window.editSentLetter = function(firebaseKey) {
   const actionsContainer = document.getElementById('modal-actions-container');
   const plainText = cartaAtualUnica.conteudo.replace(/<br>/g, '\n');
 
+  // Adicionamos o campo de texto para o emoji/selo
   paper.innerHTML = `
     <div class="write-box" style="margin: 0; max-width: 100%;">
       <h3 style="color: var(--primary); margin-bottom: 10px; text-align: center;">Editando Carta ✏️</h3>
       <div class="input-group"><label>Título:</label><input type="text" id="edit-titulo" value="${cartaAtualUnica.titulo}"></div>
+      <div class="input-group"><label>Selo (Emoji):</label><input type="text" id="edit-selo" value="${cartaAtualUnica.selo || '💌'}" maxlength="2" style="text-align: center; font-size: 20px;"></div>
       <div class="input-group"><label>Remetente:</label><input type="text" id="edit-remetente" value="${cartaAtualUnica.remetente}"></div>
       <div class="input-group"><label>Destinatário:</label><input type="text" id="edit-destinatario" value="${cartaAtualUnica.destinatario}"></div>
       <div class="input-group"><label>Mensagem:</label><textarea id="edit-texto" style="height: 160px;">${plainText}</textarea></div>
@@ -230,13 +314,21 @@ window.editSentLetter = function(firebaseKey) {
 
 window.saveSentLetter = function(firebaseKey) {
   const nTit = document.getElementById('edit-titulo').value.trim();
+  const nSelo = document.getElementById('edit-selo').value.trim() || '💌';
   const nRem = document.getElementById('edit-remetente').value.trim();
   const nDes = document.getElementById('edit-destinatario').value.trim();
   const nTex = document.getElementById('edit-texto').value.trim();
 
   if (!nTit || !nRem || !nDes || !nTex) return alert("Todos os campos devem ser preenchidos!");
 
-  const updates = { titulo: nTit, remetente: nRem, destinatario: nDes, conteudo: nTex.replace(/\n/g, '<br>') };
+  // Incluímos o nSelo no objeto de atualização
+  const updates = { 
+    titulo: nTit, 
+    selo: nSelo, 
+    remetente: nRem, 
+    destinatario: nDes, 
+    conteudo: nTex.replace(/\n/g, '<br>') 
+  };
 
   update(ref(db, `correio_dados/enviadas/${firebaseKey}`), updates).then(() => {
     cartaAtualUnica = { ...cartaAtualUnica, ...updates };

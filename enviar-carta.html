@@ -115,6 +115,12 @@
         </div>
 
         <div class="input-group">
+            <label>Data de Desbloqueio (Opcional):</label>
+            <input type="date" id="data_abertura" style="width: 100%; border-color: #C3AEFF;">
+            <small style="color: #6961D7; margin-top: 5px; font-size: 11px;">Deixe em branco para entrega imediata. Datas no futuro trancarão a carta 🔒.</small>
+        </div>
+
+        <div class="input-group">
             <label>Mensagem da Carta:</label>
             <textarea id="texto" placeholder="Escreva o texto aqui..."></textarea>
         </div>
@@ -191,7 +197,6 @@
             { char: '☕', keys: 'cafe coffee xicara' }
         ];
 
-        // Função para renderizar a grade de ícones
         function renderIcons(list) {
             grid.innerHTML = '';
             if (list.length === 0) {
@@ -202,16 +207,14 @@
                 let div = document.createElement('div');
                 div.className = 'icon-item';
                 div.innerText = item.char;
-                div.title = item.keys; // Tooltip ao passar o mouse
+                div.title = item.keys; 
                 div.onclick = () => aplicarSelo(item.char);
                 grid.appendChild(div);
             });
         }
 
-        // Renderiza todos os ícones ao iniciar
         renderIcons(iconData);
 
-        // Sistema de busca em tempo real
         searchInput.addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase().trim();
             const filtered = iconData.filter(i => i.keys.includes(term) || i.char === term);
@@ -230,7 +233,6 @@
             document.querySelectorAll('.picker-tab').forEach(el => el.classList.remove('active'));
             event.target.classList.add('active');
             
-            // Foca na barra de pesquisa automaticamente ao abrir a aba
             if(tabName === 'icones') {
                 setTimeout(() => searchInput.focus(), 50);
             }
@@ -255,8 +257,7 @@
             projectId: "correio-91c8e",
             storageBucket: "correio-91c8e.firebasestorage.app",
             messagingSenderId: "40461554553",
-            appId: "1:40461554553:web:92720144d48859c8e215a8",
-            measurementId: "G-VK7BC2QY03"
+            appId: "1:40461554553:web:92720144d48859c8e215a8"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -268,6 +269,7 @@
         window.abrirPreview = function() {
             const id = document.getElementById('id_carta').value;
             const selo = document.getElementById('selo').value.trim();
+            const dataAbertura = document.getElementById('data_abertura').value; // Capta a Data
             const remetente = document.getElementById('remetente').value.trim();
             const destinatario = document.getElementById('destinatario').value.trim();
             const titulo = document.getElementById('titulo').value.trim();
@@ -285,6 +287,7 @@
                 destinatario: destinatario,
                 selo: selo || "💌",
                 titulo: titulo,
+                data_abertura: dataAbertura, // Salva no JSON
                 conteudo: texto.replace(/\n/g, '<br>')
             };
 
@@ -308,6 +311,7 @@
                 alert("Carta enviada com sucesso para o banco de dados!");
                 document.getElementById('titulo').value = "";
                 document.getElementById('texto').value = "";
+                document.getElementById('data_abertura').value = ""; // Limpa a data após o envio
                 voltarEditar();
                 document.getElementById('id_carta').value = cartaPrevia.id + 1; 
             }).catch((error) => {
