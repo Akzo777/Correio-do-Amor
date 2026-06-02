@@ -20,7 +20,6 @@
         .btn-secondary { background: #C3AEFF; color: #140F4B; border: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase; width: 100%; margin-top: 10px; transition: 0.2s; }
         .btn-secondary:hover { background: #A78AFB; }
         
-        /* --- ESTILOS DO MENU NOTION --- */
         .emoji-selector-container { position: relative; }
         .emoji-btn { background: #F2E1FF; border: 2px solid #C3AEFF; border-radius: 8px; font-size: 26px; cursor: pointer; width: 100%; height: 45px; display: flex; justify-content: center; align-items: center; transition: 0.2s; color: #140F4B;}
         .emoji-btn:hover { border-color: #6961D7; background: #DDC8FF; }
@@ -35,7 +34,6 @@
         #tab-emojis { display: block; }
         #tab-icones { display: none; padding: 10px; background: white; }
         
-        /* BARRA DE PESQUISA DE ÍCONES */
         .search-icon-input { width: 100%; padding: 8px 12px; border: 1px solid #E0E0E0; border-radius: 6px; font-size: 13px; margin-bottom: 10px; outline: none; background: #F9F9F9; transition: 0.2s; }
         .search-icon-input:focus { border-color: #6961D7; background: white; }
         
@@ -50,7 +48,6 @@
 
         emoji-picker { --background: #ffffff; --indicator-color: #6961D7; --button-hover-background: #F2E1FF; --search-focus-border-color: #6961D7; --border-radius: 0; width: 100%; border: none;}
 
-        /* ESTILOS DE PREVIEW */
         #preview-section { display: none; }
         .paper { background: #F2E1FF; padding: 30px 20px; border-radius: 8px; border-left: 6px solid #6961D7; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
         .letter-header { background: #DDC8FF; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #6961D7; }
@@ -59,6 +56,10 @@
         .header-value { font-size: 14.5px; font-weight: 700; flex: 1; }
         .letter-body { font-family: 'Lora', serif; font-size: 15px; line-height: 1.8; text-align: justify; }
         .preview-actions { display: flex; gap: 10px; }
+        
+        /* Checkbox inline */
+        .checkbox-group { display: flex; align-items: center; margin-bottom: 15px; gap: 10px; cursor: pointer; }
+        .checkbox-group input { width: auto; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -114,10 +115,21 @@
             <input type="text" id="titulo" placeholder="Ex: Carta 03: Nosso momento">
         </div>
 
-        <div class="input-group">
+        <!-- CAMPO: DATA DE DESBLOQUEIO -->
+        <div class="input-group" style="margin-bottom: 10px;">
             <label>Data de Desbloqueio (Opcional):</label>
             <input type="date" id="data_abertura" style="width: 100%; border-color: #C3AEFF;">
             <small style="color: #6961D7; margin-top: 5px; font-size: 11px;">Deixe em branco para entrega imediata. Datas no futuro trancarão a carta 🔒.</small>
+        </div>
+
+        <!-- NOVO CAMPO: OPÇÃO DE HORÁRIO -->
+        <div class="checkbox-group">
+            <input type="checkbox" id="has-time" onchange="toggleTimeInput()">
+            <label for="has-time" style="margin: 0; cursor: pointer;">Definir um horário exato de desbloqueio?</label>
+        </div>
+        <div class="input-group" id="time-group" style="display: none;">
+            <label>Horário:</label>
+            <input type="time" id="hora_abertura">
         </div>
 
         <div class="input-group">
@@ -162,7 +174,6 @@
         const searchInput = document.getElementById('icon-search');
         const grid = document.getElementById('icons-grid');
 
-        // Banco de ícones catalogados com palavras-chave
         const iconData = [
             { char: '✦', keys: 'estrela star brilho magic magica' },
             { char: '✧', keys: 'estrela star brilho vazio' },
@@ -232,10 +243,7 @@
             document.getElementById('tab-icones').style.display = tabName === 'icones' ? 'block' : 'none';
             document.querySelectorAll('.picker-tab').forEach(el => el.classList.remove('active'));
             event.target.classList.add('active');
-            
-            if(tabName === 'icones') {
-                setTimeout(() => searchInput.focus(), 50);
-            }
+            if(tabName === 'icones') { setTimeout(() => searchInput.focus(), 50); }
         };
 
         emojiBtn.addEventListener('click', () => {
@@ -249,6 +257,13 @@
                 pickerWrapper.style.display = 'none';
             }
         });
+
+        // Função do Toggle de Tempo
+        window.toggleTimeInput = function() {
+            const hasTime = document.getElementById('has-time').checked;
+            document.getElementById('time-group').style.display = hasTime ? 'flex' : 'none';
+            if (!hasTime) document.getElementById('hora_abertura').value = ""; // Limpa se desmarcar
+        };
 
         const firebaseConfig = {
             apiKey: "AIzaSyDhAP2RMQ1TQyLzB1N9hs76AVjfqTjB9Pk",
@@ -269,7 +284,12 @@
         window.abrirPreview = function() {
             const id = document.getElementById('id_carta').value;
             const selo = document.getElementById('selo').value.trim();
-            const dataAbertura = document.getElementById('data_abertura').value; // Capta a Data
+            const dataAbertura = document.getElementById('data_abertura').value;
+            
+            // CAPTURA A HORA
+            const hasTime = document.getElementById('has-time').checked;
+            const horaAbertura = hasTime ? document.getElementById('hora_abertura').value : "";
+
             const remetente = document.getElementById('remetente').value.trim();
             const destinatario = document.getElementById('destinatario').value.trim();
             const titulo = document.getElementById('titulo').value.trim();
@@ -287,7 +307,8 @@
                 destinatario: destinatario,
                 selo: selo || "💌",
                 titulo: titulo,
-                data_abertura: dataAbertura, // Salva no JSON
+                data_abertura: dataAbertura, 
+                hora_abertura: horaAbertura, // Salva no Firebase
                 conteudo: texto.replace(/\n/g, '<br>')
             };
 
@@ -311,7 +332,10 @@
                 alert("Carta enviada com sucesso para o banco de dados!");
                 document.getElementById('titulo').value = "";
                 document.getElementById('texto').value = "";
-                document.getElementById('data_abertura').value = ""; // Limpa a data após o envio
+                document.getElementById('data_abertura').value = "";
+                document.getElementById('has-time').checked = false;
+                document.getElementById('hora_abertura').value = "";
+                toggleTimeInput(); 
                 voltarEditar();
                 document.getElementById('id_carta').value = cartaPrevia.id + 1; 
             }).catch((error) => {

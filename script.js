@@ -97,11 +97,16 @@ window.closeMailbox = function() {
   document.getElementById('close-box-btn').classList.remove('visible');
 }
 
-function formatarData(dataISO) {
+// FORMATAR DATA COM HORÁRIO
+function formatarDataHora(dataISO, horaISO) {
   if (!dataISO) return "";
   const partes = dataISO.split('-');
   if(partes.length < 3) return dataISO;
-  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  let str = `${partes[2]}/${partes[1]}/${partes[0]}`;
+  if (horaISO) {
+      str += ` às ${horaISO}`;
+  }
+  return str;
 }
 
 window.showCustomAlert = function(title, message, icon = "⚠️") {
@@ -133,31 +138,45 @@ window.renderEnvelope = function() {
 
   display.classList.add('archive-grid');
   
-  const hoje = new Date();
-  hoje.setHours(0,0,0,0);
+  // Agora compara o relógio exato (data + hora atuais)
+  const agora = new Date();
 
-  const cartasOrdenadas = [...novasCartas].sort((a, b) => new Date(a.data_abertura || 0) - new Date(b.data_abertura || 0));
+  // Ordenar para as abertas virem primeiro, seguidas das datas futuras ordenadas cronologicamente
+  const cartasOrdenadas = [...novasCartas].sort((a, b) => {
+      const horaA = a.hora_abertura ? `T${a.hora_abertura}:00` : "T00:00:00";
+      const horaB = b.hora_abertura ? `T${b.hora_abertura}:00` : "T00:00:00";
+      const dataA = new Date((a.data_abertura || 0) + horaA);
+      const dataB = new Date((b.data_abertura || 0) + horaB);
+      return dataA - dataB;
+  });
 
   cartasOrdenadas.forEach(carta => {
     let isTrancada = false;
+    
     if (carta.data_abertura) {
-      const dataAbertura = new Date(carta.data_abertura + "T00:00:00");
-      if (dataAbertura > hoje) isTrancada = true;
+      // Cria a data mesclando com o horário (se existir) ou joga pra 00:00
+      const horaAbertura = carta.hora_abertura ? carta.hora_abertura + ":00" : "00:00:00";
+      const dataAlvo = new Date(`${carta.data_abertura}T${horaAbertura}`);
+      
+      if (dataAlvo > agora) {
+          isTrancada = true;
+      }
     }
 
     const card = document.createElement('div');
     if (isTrancada) {
       card.className = "mini-envelope locked-envelope";
-      card.onclick = () => showCustomAlert("Selo Mágico Intacto", `Esta carta está viajando pelo tempo e só poderá ser aberta no dia <b>${formatarData(carta.data_abertura)}</b>.<br><br>Controle a ansiedade! 🔒`, "💌");
+      const textoAviso = formatarDataHora(carta.data_abertura, carta.hora_abertura);
+      
+      card.onclick = () => showCustomAlert("Selo Mágico Intacto", `Esta carta está viajando pelo tempo e só poderá ser aberta no dia <b>${textoAviso}</b>.<br><br>Controle a ansiedade! 🔒`, "💌");
       card.innerHTML = `
         <div style="font-size: 24px; margin-bottom: 5px;">🔒</div>
         <div>${carta.titulo}</div>
-        <div style="font-size: 10px; color: #FF4B4B; margin-top: 5px;">Abre em: ${formatarData(carta.data_abertura)}</div>
+        <div style="font-size: 10px; color: #FF4B4B; margin-top: 5px;">Abre em: ${textoAviso}</div>
       `;
     } else {
       card.className = "mini-envelope";
       card.onclick = () => { cartaAtualUnica = carta; openLetterContent(true); };
-      // O SEGREDO ESTÁ AQUI: Usa o selo que você escolheu no painel, ou a carta como padrão
       card.innerHTML = `
         <div style="font-size: 24px; margin-bottom: 5px;">${carta.selo || '💌'}</div>
         <div>${carta.titulo}</div>
@@ -222,7 +241,6 @@ window.updateLidasUI = function() {
   cartasLidas.forEach(letter => {
     const mini = document.createElement('div');
     mini.className = "mini-envelope";
-    // MANTÉM O SELO ORIGINAL NA ABA DE LIDAS
     mini.innerHTML = `
       <div style="font-size: 24px; margin-bottom: 5px;">${letter.selo || '💌'}</div>
       <div>${letter.titulo}</div>
@@ -234,7 +252,7 @@ window.updateLidasUI = function() {
 
 window.sendLetter = function() {
   const title = document.getElementById('letter-title').value.trim();
-  let seloEscolhido = document.getElementById('send-selo').value.trim(); // Pega o que ela digitou
+  let seloEscolhido = document.getElementById('send-selo').value.trim();
   const senderName = document.getElementById('sender-name').value.trim();
   const recipientName = document.getElementById('recipient-name').value.trim();
   const text = document.getElementById('write-text').value.trim();
@@ -243,7 +261,6 @@ window.sendLetter = function() {
     return alert("Por favor, preencha todos os campos, incluindo o Título, antes de enviar!");
   }
   
-  // Trava de segurança: Se ela esquecer o selo, colocamos o padrão.
   if (!seloEscolhido) {
     seloEscolhido = "💌";
   }
@@ -253,17 +270,16 @@ window.sendLetter = function() {
     titulo: title,
     remetente: senderName,
     destinatario: recipientName,
-    selo: seloEscolhido, // Salva o emoji que ela escolheu
+    selo: seloEscolhido,
     conteudo: text.replace(/\n/g, '<br>')
   };
 
   push(ref(db, 'correio_dados/enviadas'), novaCartaDela).then(() => {
-    // Limpa os campos após o envio
     document.getElementById('letter-title').value = "";
     document.getElementById('sender-name').value = "";
     document.getElementById('recipient-name').value = "";
     document.getElementById('write-text').value = ""; 
-    document.getElementById('send-selo').value = ""; // Limpa o emoji
+    document.getElementById('send-selo').value = ""; 
     
     switchTab('enviadas');
   }).catch((error) => alert("Erro ao conectar ao servidor: " + error.message));
@@ -277,7 +293,6 @@ window.updateEnviadasUI = function() {
   cartasEnviadasDela.forEach(letter => {
     const mini = document.createElement('div');
     mini.className = "mini-envelope";
-    // MANTÉM O SELO ORIGINAL NA ABA DE ENVIADAS
     mini.innerHTML = `
       <div style="font-size: 24px; margin-bottom: 5px;">${letter.selo || '💌'}</div>
       <div>${letter.titulo}</div>
@@ -291,13 +306,26 @@ window.editSentLetter = function(firebaseKey) {
   const paper = document.getElementById('paper-content');
   const actionsContainer = document.getElementById('modal-actions-container');
   const plainText = cartaAtualUnica.conteudo.replace(/<br>/g, '\n');
+  
+  // INCLUINDO OS CAMPOS DE DATA E HORA NA EDIÇÃO
+  const temData = cartaAtualUnica.data_abertura || "";
+  const temHora = cartaAtualUnica.hora_abertura || "";
 
-  // Adicionamos o campo de texto para o emoji/selo
   paper.innerHTML = `
     <div class="write-box" style="margin: 0; max-width: 100%;">
       <h3 style="color: var(--primary); margin-bottom: 10px; text-align: center;">Editando Carta ✏️</h3>
       <div class="input-group"><label>Título:</label><input type="text" id="edit-titulo" value="${cartaAtualUnica.titulo}"></div>
       <div class="input-group"><label>Selo (Emoji):</label><input type="text" id="edit-selo" value="${cartaAtualUnica.selo || '💌'}" maxlength="2" style="text-align: center; font-size: 20px;"></div>
+      
+      <div class="input-group">
+          <label>Data Desbloqueio:</label>
+          <input type="date" id="edit-data" value="${temData}">
+      </div>
+      <div class="input-group">
+          <label>Hora Desbloqueio (Opcional):</label>
+          <input type="time" id="edit-hora" value="${temHora}">
+      </div>
+
       <div class="input-group"><label>Remetente:</label><input type="text" id="edit-remetente" value="${cartaAtualUnica.remetente}"></div>
       <div class="input-group"><label>Destinatário:</label><input type="text" id="edit-destinatario" value="${cartaAtualUnica.destinatario}"></div>
       <div class="input-group"><label>Mensagem:</label><textarea id="edit-texto" style="height: 160px;">${plainText}</textarea></div>
@@ -315,16 +343,19 @@ window.editSentLetter = function(firebaseKey) {
 window.saveSentLetter = function(firebaseKey) {
   const nTit = document.getElementById('edit-titulo').value.trim();
   const nSelo = document.getElementById('edit-selo').value.trim() || '💌';
+  const nData = document.getElementById('edit-data').value;
+  const nHora = document.getElementById('edit-hora').value;
   const nRem = document.getElementById('edit-remetente').value.trim();
   const nDes = document.getElementById('edit-destinatario').value.trim();
   const nTex = document.getElementById('edit-texto').value.trim();
 
-  if (!nTit || !nRem || !nDes || !nTex) return alert("Todos os campos devem ser preenchidos!");
+  if (!nTit || !nRem || !nDes || !nTex) return alert("Todos os campos básicos devem ser preenchidos!");
 
-  // Incluímos o nSelo no objeto de atualização
   const updates = { 
     titulo: nTit, 
     selo: nSelo, 
+    data_abertura: nData,
+    hora_abertura: nHora,
     remetente: nRem, 
     destinatario: nDes, 
     conteudo: nTex.replace(/\n/g, '<br>') 
