@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Nunito:wght@400;600;700&display=swap');
+        
+        /* PALETA MODO NOTURNO (Dark Grays & Purples) */
+        :root {
+            --bg-body: #0D0D12;
+            --bg-box: #1A1A24;
+            --bg-input: #252533;
+            --bg-hover: #2D2D3F;
+            --border-color: #38384D;
+            --text-main: #E2E8F0;
+            --text-muted: #9CA3AF;
+            --purple-light: #A78AFB;
+            --purple-main: #6961D7;
+            --purple-dark: #393199;
+            --danger: #FF4B4B;
+        }
+
+        body { font-family: 'Nunito', sans-serif; background: var(--bg-body); display: flex; justify-content: center; padding: 40px 20px; margin: 0; color: var(--text-main); }
+        .admin-box { background: var(--bg-box); padding: 30px; border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); width: 100%; max-width: 550px; border-top: 6px solid var(--purple-main); margin-bottom: 20px; }
+        h2 { text-align: center; margin-top: 0; color: var(--purple-light); margin-bottom: 20px; text-shadow: 0 0 10px rgba(167, 138, 251, 0.2); }
+        
+        /* ABAS */
+        .admin-tabs { display: flex; margin-bottom: 25px; border-bottom: 2px solid var(--border-color); }
+        .admin-tab-btn { flex: 1; background: none; border: none; padding: 12px 5px; font-weight: bold; color: var(--text-muted); cursor: pointer; transition: 0.2s; font-size: 13px; outline: none; text-align: center; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .admin-tab-btn:hover { background: var(--bg-hover); color: var(--text-main); }
+        .admin-tab-btn.active { border-bottom: 3px solid var(--purple-light); color: var(--purple-light); background: var(--bg-hover); border-radius: 8px 8px 0 0; }
+        .admin-tab-content { display: none; }
+        .admin-tab-content.active { display: block; }
+        
+        /* BADGE */
+        .notification-badge { display: none; background-color: var(--danger); color: white; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 10px; animation: pulse-badge 1.5s infinite; }
+        .notification-badge.show { display: inline-block; }
+        @keyframes pulse-badge { 0% { box-shadow: 0 0 0 0 rgba(255, 75, 75, 0.7); } 100% { box-shadow: 0 0 0 5px rgba(255, 75, 75, 0); } }
+
+        /* GRADE DE CARTAS */
+        .letters-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .letter-card { background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px 10px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .letter-card:hover { background: var(--bg-hover); border-color: var(--purple-light); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(167, 138, 251, 0.15); }
+        .letter-card.locked { opacity: 0.6; border-color: var(--danger); }
+        .letter-card.locked:hover { background: rgba(255, 75, 75, 0.1); cursor: not-allowed; transform: none; }
+        .letter-card-icon { font-size: 26px; margin-bottom: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+        .letter-card-title { font-size: 13px; font-weight: bold; color: var(--text-main); line-height: 1.3; }
+        .letter-card-status { font-size: 11px; color: var(--purple-light); margin-top: 8px; font-weight: bold; }
+        .empty-msg { text-align: center; color: var(--text-muted); font-size: 14px; grid-column: 1 / -1; padding: 20px 0; }
+
+        /* FORMULÁRIOS */
+        .input-group { margin-bottom: 15px; display: flex; flex-direction: column; }
+        label { font-size: 13px; font-weight: bold; color: var(--purple-light); margin-bottom: 5px; }
+        input, textarea, select { width: 100%; padding: 12px; background: var(--bg-input); border: 2px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 14px; color: var(--text-main); outline: none; box-sizing: border-box; transition: 0.2s; }
+        input:focus, textarea:focus, select:focus { border-color: var(--purple-light); background: var(--bg-hover); }
+        textarea { height: 120px; resize: none; }
+        input[type="date"]::-webkit-calendar-picker-indicator, input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+        
+        .btn-primary { background: var(--purple-main); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase; width: 100%; transition: 0.2s; box-shadow: 0 4px 15px rgba(105, 97, 215, 0.3); }
+        .btn-primary:hover { background: var(--purple-light); color: var(--bg-body); }
+        .btn-secondary { background: var(--border-color); color: var(--text-main); border: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase; width: 100%; margin-top: 10px; transition: 0.2s; }
+        .btn-secondary:hover { background: var(--bg-hover); border: 1px solid var(--purple-light); }
+        
+        /* SELETOR DE EMOJIS */
+        .emoji-selector-container { position: relative; }
+        .emoji-btn { background: var(--bg-input); border: 2px solid var(--border-color); border-radius: 8px; font-size: 26px; cursor: pointer; width: 100%; height: 47px; display: flex; justify-content: center; align-items: center; transition: 0.2s; color: var(--text-main);}
+        .emoji-btn:hover { border-color: var(--purple-light); background: var(--bg-hover); }
+        .custom-picker-wrapper { position: absolute; z-index: 1000; margin-top: 5px; left: 0; background: var(--bg-box); border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); border: 1px solid var(--purple-main); width: 310px; overflow: hidden; display: none; }
+        .picker-tabs { display: flex; border-bottom: 1px solid var(--border-color); background: var(--bg-input); }
+        .picker-tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 13px; font-weight: bold; color: var(--text-muted); transition: 0.2s; border-bottom: 2px solid transparent; }
+        .picker-tab:hover { color: var(--purple-light); background: var(--bg-hover); }
+        .picker-tab.active { border-bottom: 2px solid var(--purple-light); color: var(--purple-light); background: var(--bg-box); }
+        #tab-emojis { display: block; }
+        #tab-icones { display: none; padding: 10px; background: var(--bg-box); }
+        .search-icon-input { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; margin-bottom: 10px; outline: none; background: var(--bg-input); color: white; transition: 0.2s; }
+        .search-icon-input:focus { border-color: var(--purple-light); }
+        .icons-scroll-area { max-height: 250px; overflow-y: auto; padding-right: 5px; }
+        .icons-scroll-area::-webkit-scrollbar { width: 4px; }
+        .icons-scroll-area::-webkit-scrollbar-thumb { background: var(--purple-main); border-radius: 4px; }
+        .icons-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+        .icon-item { font-size: 20px; text-align: center; cursor: pointer; padding: 8px 0; border-radius: 6px; transition: 0.2s; color: var(--purple-light); }
+        .icon-item:hover { background: var(--bg-hover); transform: scale(1.1); }
+        .no-results { grid-column: 1 / -1; text-align: center; font-size: 12px; color: var(--text-muted); padding: 20px 0; }
+        emoji-picker { --background: var(--bg-box); --indicator-color: var(--purple-light); --button-hover-background: var(--bg-hover); --search-focus-border-color: var(--purple-light); --border-radius: 0; --text-color: var(--text-main); width: 100%; border: none;}
+
+        /* PREVIEW (Dark Paper) */
+        .paper { background: var(--bg-input); padding: 30px 20px; border-radius: 8px; border-left: 6px solid var(--purple-main); margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); transition: 0.3s; }
+        .letter-header { background: var(--bg-hover); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--purple-light); transition: 0.3s; }
+        .header-item { margin-bottom: 8px; display: flex; align-items: flex-start; }
+        .header-label { color: var(--purple-light); font-weight: 800; font-size: 11px; margin-right: 8px; width: 45px; margin-top: 3px; }
+        .header-value { font-size: 14.5px; font-weight: 700; flex: 1; color: white; }
+        .letter-body { font-family: 'Lora', serif; font-size: 15px; line-height: 1.8; text-align: justify; color: #D1D5DB; }
+        .preview-actions { display: flex; gap: 10px; }
+        .checkbox-group { display: flex; align-items: center; margin-bottom: 15px; gap: 10px; cursor: pointer; }
+        .checkbox-group input { width: 18px; height: 18px; cursor: pointer; accent-color: var(--purple-main); }
+
+        /* --- TEMAS PARA O MODO PREVIEW --- */
+        .theme-stellar { background: #0b0c10 !important; color: #e0e0e0 !important; background-image: radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px) !important; background-size: 30px 30px !important; border: 1px solid #1f2833 !important; }
+        .theme-stellar .letter-header { background: rgba(31, 40, 51, 0.8) !important; border-left-color: #66fcf1 !important; }
+        .theme-stellar .header-label { color: #45a29e !important; }
+        .theme-stellar .header-value, .theme-stellar .letter-body { color: #c5c6c7 !important; text-shadow: 0 0 2px rgba(255,255,255,0.1); }
+
+        .theme-parchment { background: #fdf5e6 !important; color: #5c4033 !important; box-shadow: inset 0 0 50px rgba(139,69,19,0.1) !important; border-left-color: #8b4513 !important; }
+        .theme-parchment .letter-header { background: rgba(222, 184, 135, 0.3) !important; border-left-color: #8b4513 !important; }
+        .theme-parchment .header-label { color: #8b4513 !important; }
+        .theme-parchment .header-value, .theme-parchment .letter-body { color: #3e2723 !important; font-family: 'Lora', serif !important; }
+
+        /* --- SUSPIRO / CORAÇÃO PARA O PREVIEW --- */
+        .reaction-container { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px dashed rgba(255,255,255,0.1); }
+        .theme-parchment .reaction-container { border-top-color: rgba(0,0,0,0.1); }
+        .btn-suspiro { background: none; border: none; font-size: 35px; cursor: pointer; transition: 0.3s; filter: grayscale(100%) opacity(0.5); transform: scale(1); outline: none; }
+        .btn-suspiro:hover, .btn-suspiro.loved { filter: grayscale(0%) opacity(1); transform: scale(1.1); animation: heartbeat 0.8s forwards; text-shadow: 0 0 15px rgba(255, 75, 75, 0.6); }
+
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.3); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-box" id="main-box">
+        <div class="admin-tabs">
+            <button class="admin-tab-btn active" id="btn-tab-form" onclick="switchAdminTab('form')">Nova</button>
+            <button class="admin-tab-btn" id="btn-tab-naolidas" onclick="switchAdminTab('naolidas')">
+                Não Lidas <span id="admin-badge" class="notification-badge"></span>
+            </button>
+            <button class="admin-tab-btn" id="btn-tab-lidas" onclick="switchAdminTab('lidas')">Lidas</button>
+            <button class="admin-tab-btn" id="btn-tab-enviadas" onclick="switchAdminTab('enviadas')">Enviadas</button>
+        </div>
+
+        <div id="tab-form" class="admin-tab-content active">
+            <h2 id="form-title">💌 Enviar para Ela</h2>
+            <div style="display:flex; gap:10px;">
+                <div class="input-group" style="flex:1;">
+                    <label>Número (ID):</label>
+                    <input type="number" id="id_carta" placeholder="Ex: 3">
+                </div>
+                <div class="input-group" style="flex:1;">
+                    <label>Selo:</label>
+                    <div class="emoji-selector-container">
+                        <button type="button" id="emoji-btn" class="emoji-btn">✨</button>
+                        <input type="hidden" id="selo" value="✨">
+                        <div id="custom-picker-wrapper" class="custom-picker-wrapper">
+                            <div class="picker-tabs">
+                                <div class="picker-tab active" onclick="switchTabPicker('emojis', event)">Emoji</div>
+                                <div class="picker-tab" onclick="switchTabPicker('icones', event)">Ícones</div>
+                            </div>
+                            <div id="tab-emojis"><emoji-picker></emoji-picker></div>
+                            <div id="tab-icones">
+                                <input type="text" id="icon-search" class="search-icon-input" placeholder="Filtrar ícones...">
+                                <div class="icons-scroll-area"><div class="icons-grid" id="icons-grid"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TEMA DO PAPEL -->
+            <div class="input-group">
+                <label>Papel de Carta (Tema):</label>
+                <select id="tema">
+                    <option value="default">💌 Clássico (Roxo Suave)</option>
+                    <option value="parchment">📜 Pergaminho (Vintage)</option>
+                    <option value="romantic">🌸 Romântico (Rosa Pastel)</option>
+                    <option value="midnight">🌙 Meia-Noite (Escuro Limpo)</option>
+                    <option value="minimalist">☁️ Minimalista (Clean Branco)</option>
+                </select>
+            </div>
+
+            <div class="input-group"><label>Remetente:</label><input type="text" id="remetente" value="Seu Nome 💜"></div>
+            <div class="input-group"><label>Destinatário:</label><input type="text" id="destinatario" value="Para Minha Garota"></div>
+            <div class="input-group"><label>Título:</label><input type="text" id="titulo" placeholder="Ex: Carta 03: Nosso momento"></div>
+
+            <div class="input-group" style="margin-bottom: 10px;">
+                <label>Data de Desbloqueio (Opcional):</label>
+                <input type="date" id="data_abertura">
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="has-time" onchange="toggleTimeInput()">
+                <label for="has-time" style="margin: 0; cursor: pointer; color: var(--text-main); font-size: 13px;">Definir um horário exato?</label>
+            </div>
+            <div class="input-group" id="time-group" style="display: none;">
+                <label>Horário:</label>
+                <input type="time" id="hora_abertura">
+            </div>
+
+            <div class="input-group"><label>Mensagem da Carta:</label><textarea id="texto" placeholder="Escreva o texto aqui..."></textarea></div>
+            <button class="btn-primary" onclick="abrirPreview()">Pré-Visualizar 👀</button>
+            <div style="text-align:center; margin-top:15px;">
+                <button onclick="limparFormulario()" style="background:none; border:none; color:var(--danger); cursor:pointer; text-decoration:underline; font-size: 13px;">Limpar / Cancelar Edição</button>
+            </div>
+        </div>
+
+        <div id="tab-naolidas" class="admin-tab-content">
+            <h2>Caixa de Entrada 📬</h2>
+            <p style="text-align:center; font-size:13px; color:var(--text-muted); margin-top:-15px; margin-bottom:20px;">Cartas que ela enviou para você.</p>
+            <div class="letters-grid" id="grid-naolidas"></div>
+        </div>
+        <div id="tab-lidas" class="admin-tab-content">
+            <h2>Memórias Guardadas 📖</h2>
+            <p style="text-align:center; font-size:13px; color:var(--text-muted); margin-top:-15px; margin-bottom:20px;">Cartas dela que você já leu.</p>
+            <div class="letters-grid" id="grid-lidas"></div>
+        </div>
+        <div id="tab-enviadas" class="admin-tab-content">
+            <h2>Cartas Enviadas 📮</h2>
+            <p style="text-align:center; font-size:13px; color:var(--text-muted); margin-top:-15px; margin-bottom:20px;">Clique na carta para editar e reenviar.</p>
+            <div class="letters-grid" id="grid-enviadas"></div>
+        </div>
+    </div>
+
+    <!-- MODO REVISÃO -->
+    <div class="admin-box" id="preview-section" style="display:none;">
+        <h2>Modo de Revisão 🔍</h2>
+        <div class="paper" id="preview-paper">
+            <div class="letter-header">
+                <div class="header-item"><span class="header-label">DE:</span><span class="header-value" id="prev-rem"></span></div>
+                <div class="header-item"><span class="header-label">PARA:</span><span class="header-value" id="prev-dest"></span></div>
+            </div>
+            <div class="letter-body" id="prev-body"></div>
+            
+            <!-- REAÇÃO FAKE PARA O PREVIEW -->
+            <div class="reaction-container" id="prev-reaction">
+                <button class="btn-suspiro" onclick="this.classList.toggle('loved')" title="Amei!">💖</button>
+                <p style="font-size: 10px; margin-top: 5px; opacity: 0.7;">Deixe um suspiro</p>
+            </div>
+        </div>
+        <div class="preview-actions">
+            <button class="btn-secondary" onclick="voltarEditar()">Voltar</button>
+            <button class="btn-primary" onclick="confirmarEnvio()">Aprovar e Salvar 🚀</button>
+        </div>
+    </div>
+
+    <!-- MODO LEITURA -->
+    <div class="admin-box" id="read-section" style="display:none;">
+        <h2 id="read-title" style="color: var(--purple-light);">💌 Lendo Carta</h2>
+        <div class="paper" id="read-paper">
+            <div class="letter-header">
+                <div class="header-item"><span class="header-label">DE:</span><span class="header-value" id="read-rem"></span></div>
+                <div class="header-item"><span class="header-label">PARA:</span><span class="header-value" id="read-dest"></span></div>
+            </div>
+            <div class="letter-body" id="read-body"></div>
+        </div>
+        <button class="btn-secondary" onclick="fecharLeitura()">Guardar na Caixa 📂</button>
+    </div>
+
+    <script type="module">
+        import 'https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const emojiBtn=document.getElementById('emoji-btn'),pickerWrapper=document.getElementById('custom-picker-wrapper'),seloInput=document.getElementById('selo'),picker=document.querySelector('emoji-picker'),searchInput=document.getElementById('icon-search'),grid=document.getElementById('icons-grid');
+        const iconData=[{char:'✦',keys:'estrela star brilho magic magica'},{char:'♡',keys:'coracao heart amor love vazio'},{char:'♥',keys:'coracao heart amor love cheio'},{char:'☾',keys:'lua moon noite night'},{char:'☀',keys:'sol sun dia luz calor'},{char:'✉',keys:'carta email correio envelope'},{char:'♪',keys:'musica nota som music'},{char:'☕',keys:'cafe coffee xicara'},{char:'❀',keys:'flor flower primavera'}]; 
+        function renderIcons(l){grid.innerHTML='';if(l.length===0){grid.innerHTML='<div class="no-results">Vazio.</div>';return;}l.forEach(i=>{let d=document.createElement('div');d.className='icon-item';d.innerText=i.char;d.onclick=()=>aplicarSelo(i.char);grid.appendChild(d);});} renderIcons(iconData); searchInput.addEventListener('input',(e)=>{renderIcons(iconData.filter(i=>i.keys.includes(e.target.value.toLowerCase().trim())||i.char===e.target.value.trim()));});
+        window.aplicarSelo=v=>{emojiBtn.innerText=v;seloInput.value=v;pickerWrapper.style.display='none';}; window.switchTabPicker=(t,e)=>{document.getElementById('tab-emojis').style.display=t==='emojis'?'block':'none';document.getElementById('tab-icones').style.display=t==='icones'?'block':'none';document.querySelectorAll('.picker-tab').forEach(el=>el.classList.remove('active'));e.target.classList.add('active');if(t==='icones')setTimeout(()=>searchInput.focus(),50);}; emojiBtn.onclick=()=>pickerWrapper.style.display=pickerWrapper.style.display==='none'?'block':'none'; picker.addEventListener('emoji-click',e=>aplicarSelo(e.detail.unicode)); document.addEventListener('click',e=>{if(!emojiBtn.contains(e.target)&&!pickerWrapper.contains(e.target))pickerWrapper.style.display='none';});
+        window.toggleTimeInput=()=>{const h=document.getElementById('has-time').checked;document.getElementById('time-group').style.display=h?'flex':'none';if(!h)document.getElementById('hora_abertura').value="";};
+
+        const firebaseConfig = { apiKey: "AIzaSyDhAP2RMQ1TQyLzB1N9hs76AVjfqTjB9Pk", authDomain: "correio-91c8e.firebaseapp.com", databaseURL: "https://correio-91c8e-default-rtdb.firebaseio.com", projectId: "correio-91c8e", storageBucket: "correio-91c8e.firebasestorage.app", messagingSenderId: "40461554553", appId: "1:40461554553:web:92720144d48859c8e215a8" };
+        const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+        
+        let cartasParaEle=[], idsLidosEle=[], cartasParaEla=[];
+
+        onValue(ref(db, 'correio_dados'), (snapshot) => {
+            const data = snapshot.val() || {};
+            cartasParaEle = Object.keys(data.para_ele||{}).map(k=>({firebaseKey:k,...data.para_ele[k]}));
+            idsLidosEle = data.lidas_ele ? Object.values(data.lidas_ele) : [];
+            cartasParaEla = Object.keys(data.para_ela||{}).map(k=>({firebaseKey:k,...data.para_ela[k]}));
+            renderAdminGrids();
+        });
+
+        function formatarDataHora(d, h) { if(!d)return""; const p=d.split('-'); let s=`${p[2]}/${p[1]}/${p[0]}`; if(h)s+=` às ${h}`; return s; }
+
+        function renderAdminGrids() {
+            const naolidasDiv = document.getElementById('grid-naolidas'), lidasDiv = document.getElementById('grid-lidas'), enviadasDiv = document.getElementById('grid-enviadas');
+            naolidasDiv.innerHTML=''; lidasDiv.innerHTML=''; enviadasDiv.innerHTML='';
+            const hoje = new Date(); let countNaoLidas = 0;
+
+            cartasParaEle.sort((a,b)=>b.id-a.id).forEach(carta => {
+                const isLida = idsLidosEle.includes(carta.id);
+                let isTrancada = false;
+                let statusText = isLida ? "Lida" : "Nova!";
+                let statusColor = isLida ? "var(--text-muted)" : "var(--purple-light)";
+
+                if (!isLida) countNaoLidas++; 
+
+                if(carta.data_abertura && !isLida) {
+                   const dataAlvo = new Date(`${carta.data_abertura}T${carta.hora_abertura||"00:00"}:00`);
+                   if(dataAlvo > hoje) { statusText = "Abre em: " + formatarDataHora(carta.data_abertura, carta.hora_abertura); statusColor = "var(--danger)"; isTrancada = true; }
+                }
+
+                const card = document.createElement('div');
+                card.className = isTrancada ? 'letter-card locked' : 'letter-card';
+                card.onclick = () => isTrancada ? alert(`Trancada até ${statusText}!`) : abrirCartaDela(carta, !isLida);
+                card.innerHTML = `<div class="letter-card-icon">${isTrancada?'🔒':(carta.selo||'💌')}</div><div class="letter-card-title">${carta.titulo}</div><div class="letter-card-status" style="color: ${statusColor}">${statusText}</div>`;
+                if(isTrancada || !isLida) naolidasDiv.appendChild(card); else lidasDiv.appendChild(card);
+            });
+
+            const badge = document.getElementById('admin-badge');
+            if(countNaoLidas > 0) { badge.innerText = countNaoLidas; badge.classList.add('show'); } else badge.classList.remove('show');
+
+            let maxId = 0;
+            cartasParaEla.sort((a,b)=>b.id-a.id).forEach(carta => {
+                if (carta.id > maxId) maxId = carta.id;
+                const card = document.createElement('div'); card.className = 'letter-card'; card.onclick = () => carregarCartaParaEdicao(carta);
+                card.innerHTML = `<div class="letter-card-icon">${carta.selo||'💌'}</div><div class="letter-card-title">${carta.titulo}</div><div class="letter-card-status" style="color: var(--purple-main)">Editar ✏️</div>`;
+                enviadasDiv.appendChild(card);
+            });
+
+            if(naolidasDiv.children.length===0) naolidasDiv.innerHTML='<div class="empty-msg">Sua caixa de entrada está vazia!</div>';
+            if(lidasDiv.children.length===0) lidasDiv.innerHTML='<div class="empty-msg">Nenhuma carta lida ainda.</div>';
+            if(enviadasDiv.children.length===0) enviadasDiv.innerHTML='<div class="empty-msg">Você ainda não enviou cartas.</div>';
+            if(!document.getElementById('id_carta').value) document.getElementById('id_carta').value = maxId + 1;
+        }
+
+        window.switchAdminTab = function(t) { document.querySelectorAll('.admin-tab-content, .admin-tab-btn').forEach(el=>el.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); document.getElementById('btn-tab-'+t).classList.add('active'); }
+        
+        window.abrirCartaDela = function(c, isNova) {
+            document.getElementById('read-title').innerText = c.titulo; document.getElementById('read-rem').innerText = c.remetente; document.getElementById('read-dest').innerText = c.destinatario; document.getElementById('read-body').innerHTML = c.conteudo;
+            
+            // Aplica o tema na caixa de leitura do Admin
+            const readPaper = document.getElementById('read-paper');
+            readPaper.className = 'paper';
+            if (c.tema !== 'default' && c.tema) {
+                readPaper.classList.add('theme-' + c.tema);
+            }
+
+            document.getElementById('main-box').style.display = 'none'; document.getElementById('read-section').style.display = 'block';
+            if(isNova) push(ref(db, 'correio_dados/lidas_ele'), c.id);
+        }
+        window.fecharLeitura = function() { document.getElementById('read-section').style.display='none'; document.getElementById('main-box').style.display='block'; switchAdminTab('naolidas'); }
+
+        window.carregarCartaParaEdicao = function(c) {
+            document.getElementById('id_carta').value = c.id; aplicarSelo(c.selo||'💌'); document.getElementById('tema').value = c.tema||"default"; document.getElementById('remetente').value = c.remetente||""; document.getElementById('destinatario').value = c.destinatario||""; document.getElementById('titulo').value = c.titulo||""; document.getElementById('data_abertura').value = c.data_abertura||''; document.getElementById('hora_abertura').value = c.hora_abertura||''; document.getElementById('has-time').checked = !!c.hora_abertura; toggleTimeInput(); document.getElementById('texto').value = c.conteudo.replace(/<br>/g, '\n');
+            document.getElementById('form-title').innerText = "✏️ Editando Carta Existente"; switchAdminTab('form');
+        }
+
+        window.limparFormulario = function() { document.getElementById('id_carta').value=""; document.getElementById('titulo').value=""; document.getElementById('tema').value="default"; document.getElementById('texto').value=""; document.getElementById('data_abertura').value=""; document.getElementById('hora_abertura').value=""; document.getElementById('has-time').checked=false; toggleTimeInput(); document.getElementById('form-title').innerText="💌 Cadastrar Nova Carta"; renderAdminGrids(); }
+
+        let cartaPrevia={}, nodeKey="";
+        window.abrirPreview = function() {
+            const id=document.getElementById('id_carta').value, selo=document.getElementById('selo').value.trim(), tema=document.getElementById('tema').value, dataAb=document.getElementById('data_abertura').value, horaAb=document.getElementById('has-time').checked?document.getElementById('hora_abertura').value:"";
+            const rem=document.getElementById('remetente').value.trim(), dest=document.getElementById('destinatario').value.trim(), tit=document.getElementById('titulo').value.trim(), txt=document.getElementById('texto').value.trim();
+            if(!id||!tit||!txt) return alert("Preencha o ID, Título e a Mensagem!");
+            nodeKey="carta"+id; cartaPrevia={id:parseInt(id),remetente:rem,destinatario:dest,selo:selo||"💌",tema:tema,titulo:tit,data_abertura:dataAb,hora_abertura:horaAb,conteudo:txt.replace(/\n/g,'<br>')};
+            
+            // Aplica o Tema na Folha de Preview
+            const prevPaper = document.getElementById('preview-paper');
+            prevPaper.className = 'paper';
+            if (tema !== 'default' && tema) {
+                prevPaper.classList.add('theme-' + tema);
+            }
+
+            document.getElementById('prev-rem').innerText=cartaPrevia.remetente; document.getElementById('prev-dest').innerText=cartaPrevia.destinatario; document.getElementById('prev-body').innerHTML=cartaPrevia.conteudo;
+            document.getElementById('main-box').style.display='none'; document.getElementById('preview-section').style.display='block';
+        };
+        window.voltarEditar = function() { document.getElementById('main-box').style.display='block'; document.getElementById('preview-section').style.display='none'; };
+        window.confirmarEnvio = function() { set(ref(db, 'correio_dados/para_ela/'+nodeKey), cartaPrevia).then(()=>{alert("Carta salva com sucesso!"); limparFormulario(); voltarEditar(); switchAdminTab('enviadas');}).catch(e=>alert("Erro: "+e.message)); };
+    </script>
+</body>
+</html>
