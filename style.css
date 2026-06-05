@@ -174,7 +174,10 @@ body { background: var(--bg-dark); display: flex; justify-content: center; align
 .theme-parchment .typewriter-cursor::after { color: #8b4513; }
 @keyframes blink-cursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-
-#onesignal-bell-container {
-    z-index: 99999 !important;
+/* --- AJUSTE DE POSIÇÃO DO SINO DO ONESIGNAL --- */
+#onesignal-bell-container, 
+.onesignal-bell-launcher {
+    bottom: 80px !important; /* Empurra o sino 80 pixels para cima */
+    z-index: 99999 !important; /* Garante que nada fique na frente dele */
 }
+
