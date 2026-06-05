@@ -355,16 +355,45 @@
         };
         window.voltarEditar = function() { document.getElementById('main-box').style.display='block'; document.getElementById('preview-section').style.display='none'; };
         
+        // --- FUNÇÃO AUXILIAR PARA FORMATAR A DATA PRO ONESIGNAL ---
+        function formatarDataOneSignal(dataStr, horaStr) {
+            // Cria um objeto de data real juntando os inputs
+            const dataAlvo = new Date(`${dataStr}T${horaStr || "00:00"}:00`);
+            
+            const pad = (n) => n < 10 ? '0' + n : n;
+            const YYYY = dataAlvo.getFullYear();
+            const MM = pad(dataAlvo.getMonth() + 1);
+            const DD = pad(dataAlvo.getDate());
+            const HH = pad(dataAlvo.getHours());
+            const mm = pad(dataAlvo.getMinutes());
+            const ss = pad(dataAlvo.getSeconds());
+
+            // Pega o fuso horário dinâmico (no seu caso, o de Brasília)
+            const offset = -dataAlvo.getTimezoneOffset();
+            const sign = offset >= 0 ? '+' : '-';
+            const offH = pad(Math.floor(Math.abs(offset) / 60));
+            const offM = pad(Math.abs(offset) % 60);
+            const timezone = `GMT${sign}${offH}${offM}`;
+
+            // Retorna no formato exato que a API do OneSignal exige: "YYYY-MM-DD HH:MM:SS GMT-0300"
+            return `${YYYY}-${MM}-${DD} ${HH}:${mm}:${ss} ${timezone}`;
+        }
+
         // ENVIO DA CARTA E DA NOTIFICAÇÃO PUSH
         window.confirmarEnvio = function() {
             const cartaRef = ref(db, 'correio_dados/para_ela/' + nodeKey);
             
             set(cartaRef, cartaPrevia).then(() => {
-                alert("Carta enviada/atualizada com sucesso no banco de dados!");
+                alert("Carta salva com sucesso no banco de dados!");
                 
-                // Dispara a notificação OneSignal apenas se a carta não tiver bloqueio futuro
-                if (!cartaPrevia.data_abertura) {
-                    enviarNotificacaoPush(cartaPrevia.titulo);
+                // --- LÓGICA DO DISPARO INTELIGENTE ---
+                if (cartaPrevia.data_abertura) {
+                    // Carta para o futuro: Agenda a notificação
+                    const dataAgendada = formatarDataOneSignal(cartaPrevia.data_abertura, cartaPrevia.hora_abertura);
+                    enviarNotificacaoPush(cartaPrevia.titulo, dataAgendada);
+                } else {
+                    // Carta imediata: Dispara agora mesmo
+                    enviarNotificacaoPush(cartaPrevia.titulo, null);
                 }
 
                 limparFormulario();
@@ -375,16 +404,25 @@
             });
         };
 
-        function enviarNotificacaoPush(tituloDaCarta) {
+        function enviarNotificacaoPush(tituloDaCarta, dataAgendada) {
             const appId = "ab98337c-1b29-4909-981e-9fe50b388cd1";
             const restApiKey = "os_v2_app_vomdg7a3ffeqtga6t7sqwoem2hzgkltn5ymucc4onezgucuqilodfss3iqjc74l3iartaath4gr3am3hh33vx2q6nngjozncmt4rs7y";
 
+            // Monta o cabeçalho base da notificação
             const payload = {
                 app_id: appId,
                 included_segments: ["Subscribed Users"],
-                headings: { "en": "Nova Carta Recebida! 💌", "pt": "Nova Carta Recebida! 💌" },
-                contents: { "en": tituloDaCarta, "pt": tituloDaCarta }
             };
+
+            // Personaliza a mensagem se for agendada ou imediata
+            if (dataAgendada) {
+                payload.send_after = dataAgendada;
+                payload.headings = { "en": "Selo Mágico Quebrado! 🔓", "pt": "Selo Mágico Quebrado! 🔓" };
+                payload.contents = { "en": `A carta do futuro "${tituloDaCarta}" já pode ser lida!`, "pt": `A carta do futuro "${tituloDaCarta}" já pode ser lida!` };
+            } else {
+                payload.headings = { "en": "Nova Carta Recebida! 💌", "pt": "Nova Carta Recebida! 💌" };
+                payload.contents = { "en": tituloDaCarta, "pt": tituloDaCarta };
+            }
 
             fetch("https://onesignal.com/api/v1/notifications", {
                 method: "POST",
@@ -395,9 +433,11 @@
                 body: JSON.stringify(payload)
             })
             .then(response => response.json())
-            .then(data => console.log("Notificação enviada com sucesso:", data))
-            .catch(error => console.error("Erro ao enviar notificação:", error));
+            .then(data => console.log("Comando de notificação processado com sucesso:", data))
+            .catch(error => console.error("Erro ao processar notificação:", error));
         }
+
+
     </script>
 </body>
 </html>
