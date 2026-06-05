@@ -11,15 +11,21 @@
   <link rel="apple-touch-icon" href="icone.png">
   <link rel="stylesheet" href="style.css">
 
- <!-- OneSignal SDK Integrado -->
+<!-- OneSignal SDK Integrado -->
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
     window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(function(OneSignal) {
-      OneSignal.init({
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
         appId: "ab98337c-1b29-4909-981e-9fe50b388cd1",
+        safari_web_id: "web.onesignal.auto.5b1b15a7-d107-41ff-b02e-c379c8847bd2",
         notifyButton: {
           enable: true, 
+        },
+        // --- MENSAGEM DE BOAS-VINDAS PERSONALIZADA ---
+        welcomeNotification: {
+          title: "Correio do Amor",
+          message: "Olá, minha gatinha, escrevi uma carta nova para você!! <3",
         },
         // --- FORÇANDO O CAMINHO PARA O GITHUB PAGES ---
         serviceWorkerParam: { scope: '/Correio-do-Amor/' },
