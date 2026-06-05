@@ -408,13 +408,11 @@
             const appId = "ab98337c-1b29-4909-981e-9fe50b388cd1";
             const restApiKey = "os_v2_app_vomdg7a3ffeqtga6t7sqwoem2hzgkltn5ymucc4onezgucuqilodfss3iqjc74l3iartaath4gr3am3hh33vx2q6nngjozncmt4rs7y";
 
-            // Monta o cabeçalho base da notificação
             const payload = {
                 app_id: appId,
                 included_segments: ["Subscribed Users"],
             };
 
-            // Personaliza a mensagem se for agendada ou imediata
             if (dataAgendada) {
                 payload.send_after = dataAgendada;
                 payload.headings = { "en": "Selo Mágico Quebrado! 🔓", "pt": "Selo Mágico Quebrado! 🔓" };
@@ -424,7 +422,11 @@
                 payload.contents = { "en": tituloDaCarta, "pt": tituloDaCarta };
             }
 
-            fetch("https://onesignal.com/api/v1/notifications", {
+            // A PONTE MÁGICA: O proxy contorna o bloqueio de CORS do navegador
+            const proxyUrl = "https://corsproxy.io/?";
+            const targetUrl = "https://onesignal.com/api/v1/notifications";
+
+            fetch(proxyUrl + targetUrl, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json; charset=utf-8",
@@ -436,7 +438,6 @@
             .then(data => console.log("Comando de notificação processado com sucesso:", data))
             .catch(error => console.error("Erro ao processar notificação:", error));
         }
-
 
     </script>
 </body>
