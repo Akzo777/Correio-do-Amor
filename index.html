@@ -11,17 +11,19 @@
   <link rel="apple-touch-icon" href="icone.png">
   <link rel="stylesheet" href="style.css">
 
-  <!-- OneSignal SDK Integrado -->
+ <!-- OneSignal SDK Integrado -->
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     OneSignalDeferred.push(function(OneSignal) {
       OneSignal.init({
         appId: "ab98337c-1b29-4909-981e-9fe50b388cd1",
-        safari_web_id: "",
         notifyButton: {
           enable: true, 
         },
+        // --- FORÇANDO O CAMINHO PARA O GITHUB PAGES ---
+        serviceWorkerParam: { scope: '/Correio-do-Amor/' },
+        serviceWorkerPath: '/Correio-do-Amor/OneSignalSDKWorker.js'
       });
     });
   </script>
