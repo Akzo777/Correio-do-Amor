@@ -173,3 +173,8 @@ body { background: var(--bg-dark); display: flex; justify-content: center; align
 .theme-stellar .typewriter-cursor::after { color: #66fcf1; }
 .theme-parchment .typewriter-cursor::after { color: #8b4513; }
 @keyframes blink-cursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+
+#onesignal-bell-container {
+    z-index: 99999 !important;
+}
