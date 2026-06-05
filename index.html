@@ -26,9 +26,9 @@
           title: "Correio do Amor",
           message: "Olá, minha gatinha, escrevi uma carta nova para você!! <3",
         },
-        // --- USANDO A URL ABSOLUTA PARA GARANTIR A LEITURA ---
-        serviceWorkerParam: { scope: 'https://akzo777.github.io/Correio-do-Amor/' },
-        serviceWorkerPath: 'https://akzo777.github.io/Correio-do-Amor/OneSignalSDKWorker.js'
+        // --- O CAMINHO RELATIVO CORRETO ---
+        serviceWorkerParam: { scope: '/Correio-do-Amor/' },
+        serviceWorkerPath: '/Correio-do-Amor/OneSignalSDKWorker.js'
       });
     });
   </script>
