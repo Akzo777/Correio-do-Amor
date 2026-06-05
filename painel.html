@@ -406,6 +406,7 @@
 
         function enviarNotificacaoPush(tituloDaCarta, dataAgendada) {
             const appId = "ab98337c-1b29-4909-981e-9fe50b388cd1";
+            // Sua REST API Key oficial
             const restApiKey = "os_v2_app_vomdg7a3ffeqtga6t7sqwoem2hzgkltn5ymucc4onezgucuqilodfss3iqjc74l3iartaath4gr3am3hh33vx2q6nngjozncmt4rs7y";
 
             const payload = {
@@ -422,16 +423,16 @@
                 payload.contents = { "en": tituloDaCarta, "pt": tituloDaCarta };
             }
 
-            // A PONTE MÁGICA: O proxy contorna o bloqueio de CORS do navegador
-            const proxyUrl = "https://corsproxy.io/?";
+            // NOVA PONTE MÁGICA: Proxy focado em APIs que não remove sua senha
+            const proxyUrl = "https://api.codetabs.com/v1/proxy?quest=";
             const targetUrl = "https://onesignal.com/api/v1/notifications";
 
             fetch(proxyUrl + targetUrl, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json; charset=utf-8",
-                    // --- O AJUSTE PARA CHAVES V2 ---
-                    "Authorization": "Key " + restApiKey 
+                    // RETORNANDO PARA O FORMATO EXIGIDO PELO ONESIGNAL
+                    "Authorization": "Basic " + restApiKey
                 },
                 body: JSON.stringify(payload)
             })
