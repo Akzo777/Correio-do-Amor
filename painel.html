@@ -405,40 +405,30 @@
         };
 
         function enviarNotificacaoPush(tituloDaCarta, dataAgendada) {
-            const appId = "ab98337c-1b29-4909-981e-9fe50b388cd1";
-            // Sua REST API Key oficial
-            const restApiKey = "os_v2_app_vomdg7a3ffeqtga6t7sqwoem2hzgkltn5ymucc4onezgucuqilodfss3iqjc74l3iartaath4gr3am3hh33vx2q6nngjozncmt4rs7y";
 
+            const webhookUrl = "https://hook.us2.make.com/5urf8q5nqq5ym4ckoxna7xn1j1t1gdqv";
+
+            // Mandamos apenas o básico para o Make. Ele fará o trabalho pesado!
             const payload = {
-                app_id: appId,
-                included_segments: ["Subscribed Users"],
+                titulo: tituloDaCarta,
+                data_agendada: dataAgendada || null
             };
 
-            if (dataAgendada) {
-                payload.send_after = dataAgendada;
-                payload.headings = { "en": "Selo Mágico Quebrado! 🔓", "pt": "Selo Mágico Quebrado! 🔓" };
-                payload.contents = { "en": `A carta do futuro "${tituloDaCarta}" já pode ser lida!`, "pt": `A carta do futuro "${tituloDaCarta}" já pode ser lida!` };
-            } else {
-                payload.headings = { "en": "Nova Carta Recebida! 💌", "pt": "Nova Carta Recebida! 💌" };
-                payload.contents = { "en": tituloDaCarta, "pt": tituloDaCarta };
-            }
-
-            // NOVA PONTE MÁGICA: Proxy focado em APIs que não remove sua senha
-            const proxyUrl = "https://api.codetabs.com/v1/proxy?quest=";
-            const targetUrl = "https://onesignal.com/api/v1/notifications";
-
-            fetch(proxyUrl + targetUrl, {
+            fetch(webhookUrl, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json; charset=utf-8",
-                    // RETORNANDO PARA O FORMATO EXIGIDO PELO ONESIGNAL
-                    "Authorization": "Basic " + restApiKey
+                    "Content-Type": "application/json"
                 },
                 body: JSON.stringify(payload)
             })
-            .then(response => response.json())
-            .then(data => console.log("Comando de notificação processado com sucesso:", data))
-            .catch(error => console.error("Erro ao processar notificação:", error));
+            .then(response => {
+                if(response.ok) {
+                    console.log("Comando de notificação enviado para o Make com sucesso!");
+                } else {
+                    console.error("Erro na comunicação com o Make.");
+                }
+            })
+            .catch(error => console.error("Erro ao tentar acionar o webhook:", error));
         }
 
     </script>
