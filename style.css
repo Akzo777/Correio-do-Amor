@@ -177,7 +177,7 @@ body { background: var(--bg-dark); display: flex; justify-content: center; align
 /* --- AJUSTE DE POSIÇÃO DO SINO DO ONESIGNAL --- */
 #onesignal-bell-container, 
 .onesignal-bell-launcher {
-    right: 15px !important; /* Ajusta a posição horizontal do sino */
+    right: 0px !important; /* Ajusta a posição horizontal do sino */
     bottom: 40px !important; /* Empurra o sino 80 pixels para cima */
     z-index: 99999 !important; /* Garante que nada fique na frente dele */
 }
