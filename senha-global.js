@@ -6,7 +6,7 @@
 
     // 2. Dicionário de Fotos (Sua Galeria)
     const fotosBloqueio = {
-        1: "./Foto-Bloqueio.jpg",
+        1: "https://akzo777.github.io/Correio-do-Amor/Foto-Bloqueio.jpg",
         2: "LINK_DA_FOTO_2_AQUI",
         3: "LINK_DA_FOTO_3_AQUI",
         4: "LINK_DA_FOTO_4_AQUI",
