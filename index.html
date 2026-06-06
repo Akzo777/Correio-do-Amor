@@ -11,6 +11,7 @@
   <link rel="apple-touch-icon" href="icone.png">
   <link rel="stylesheet" href="style.css">
 
+
 <!-- OneSignal SDK Integrado -->
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
@@ -36,40 +37,7 @@
 
 <body>
 
-  <div id="tela-bloqueio">
-    <div class="bloqueio-conteudo">
-        <img src="./Foto-Bloqueio.jpg" alt="Nossa Foto" class="foto-casal">
-        
-        <h2>Digite a Senha</h2>
-        <p>Para ler as cartas do Correio do Amor</p>
-
-        <div class="pin-visor" id="pin-visor">
-            <div class="ponto"></div>
-            <div class="ponto"></div>
-            <div class="ponto"></div>
-            <div class="ponto"></div>
-            <div class="ponto"></div>
-            <div class="ponto"></div>
-        </div>
-
-        <div class="teclado">
-            <button class="tecla" onclick="digitar(1)">1</button>
-            <button class="tecla" onclick="digitar(2)">2</button>
-            <button class="tecla" onclick="digitar(3)">3</button>
-            <button class="tecla" onclick="digitar(4)">4</button>
-            <button class="tecla" onclick="digitar(5)">5</button>
-            <button class="tecla" onclick="digitar(6)">6</button>
-            <button class="tecla" onclick="digitar(7)">7</button>
-            <button class="tecla" onclick="digitar(8)">8</button>
-            <button class="tecla" onclick="digitar(9)">9</button>
-            <button class="tecla apagar" onclick="limparTudo()">C</button>
-            <button class="tecla" onclick="digitar(0)">0</button>
-            <button class="tecla apagar" onclick="apagarUltimo()">⌫</button>
-        </div>
-    </div>
-</div>
-
-
+  <script src="senha-global.js" data-foto="1"></script>
 
   <div class="app-container">
     <button class="close-box-btn" id="close-box-btn" onclick="closeMailbox()">Fechar Caixa 📂</button>
