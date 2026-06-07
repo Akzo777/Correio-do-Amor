@@ -28,7 +28,7 @@
     estilo.innerHTML = `
         #tela-bloqueio-global { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: linear-gradient(135deg, #2A0845 0%, #8E2DE2 100%); display: flex; justify-content: center; align-items: center; z-index: 999999; font-family: 'Arial', sans-serif; color: white; }
         .bloqueio-conteudo-global { text-align: center; max-width: 350px; width: 100%; }
-        .foto-casal-global { width: 200px; height: 200px; border-radius: 50%; object-fit: cover; border: 4px solid white; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .foto-casal-global { width: 240px; height: 240px; border-radius: 50%; object-fit: cover; border: 4px solid white; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .pin-visor-global { display: flex; justify-content: center; gap: 15px; margin: 30px 0; }
         .ponto-global { width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; background-color: transparent; transition: background-color 0.2s ease; }
         .ponto-global.ativo { background-color: white; }
