@@ -42,7 +42,15 @@ window.handleMailboxClick = () => {
 
 function tocarMusica(v=0.5){ const m=document.getElementById('bg-music'); if(m&&!hasPlayedMusic){ m.volume=v; m.play().then(()=>hasPlayedMusic=true).catch(e=>console.log("Audio blk")); } }
 window.toggleMusic=()=>{ const m=document.getElementById('bg-music'), b=document.getElementById('music-control'); if(m.paused){m.play();b.innerHTML="🔊";}else{m.pause();b.innerHTML="🔇";} };
-window.closeMailbox=()=>{ document.getElementById('main-interface').style.display='none'; document.getElementById('scene').classList.remove('vanish','open-door-state'); document.getElementById('prompt').innerHTML="Clique na Caixa para Abrir 📬"; document.getElementById('close-box-btn').classList.remove('visible'); };
+window.closeMailbox=()=>{ 
+    document.getElementById('main-interface').style.display='none'; 
+    document.getElementById('scene').classList.remove('vanish','open-door-state'); 
+    document.getElementById('prompt').innerHTML="Clique na Caixa para Abrir 📬"; 
+    document.getElementById('close-box-btn').classList.remove('visible'); 
+    
+    
+    switchTab('novas'); 
+};
 
 // Função auxiliar para datas simples (UI)
 function formatarDataHora(d,h){ if(!d)return""; const p=d.split('-'); let s=`${p[2]}/${p[1]}/${p[0]}`; if(h)s+=` às ${h}`; return s; }
@@ -182,8 +190,26 @@ window.updateEnviadasUI=()=>{
 
 window.editSentLetter=(key)=>{
     const p=document.getElementById('paper-content'), a=document.getElementById('modal-actions-container'), pt=cartaAtualUnica.conteudo.replace(/<br>/g,'\n'), td=cartaAtualUnica.data_abertura||"", th=cartaAtualUnica.hora_abertura||"";
-    p.innerHTML=`<div class="write-box" style="margin: 0; max-width: 100%;"><h3 style="color: var(--primary); margin-bottom: 10px; text-align: center;">Editando ✏️</h3><div class="input-group"><label>Título:</label><input type="text" id="edit-titulo" value="${cartaAtualUnica.titulo}"></div><div class="input-group"><label>Selo:</label><input type="text" id="edit-selo" value="${cartaAtualUnica.selo||'💌'}" maxlength="2" style="text-align: center; font-size: 20px;"></div><div class="input-group"><label>Data:</label><input type="date" id="edit-data" value="${td}"></div><div class="input-group"><label>Hora:</label><input type="time" id="edit-hora" value="${th}"></div><div class="input-group"><label>Remetente:</label><input type="text" id="edit-remetente" value="${cartaAtualUnica.remetente}"></div><div class="input-group"><label>Destinatário:</label><input type="text" id="edit-destinatario" value="${cartaAtualUnica.destinatario}"></div><div class="input-group"><label>Mensagem:</label><textarea id="edit-texto" style="height: 160px;">${pt}</textarea></div></div>`;
-    a.innerHTML=`<div style="display: flex; gap: 10px;"><button class="action-btn" style="background: var(--pc3); color: var(--text-dark);" onclick="openLetterContent(false, true)">Cancelar</button><button class="action-btn" onclick="saveSentLetter('${key}')">Salvar ✅</button></div>`;
+    
+    p.innerHTML=`<div class="write-box" style="margin: 0 auto; width: 100%;">
+        <h3 style="color: var(--primary); margin-bottom: 15px; text-align: center;">Editando Carta ✏️</h3>
+        <div class="input-group"><label>Título:</label><input type="text" id="edit-titulo" value="${cartaAtualUnica.titulo}"></div>
+        <div class="input-group">
+            <label>Selo:</label>
+            <input type="text" id="edit-selo" value="${cartaAtualUnica.selo||'💌'}" maxlength="2" style="width: 100%; text-align: center; font-size: 24px; padding: 10px; border: 2px solid var(--border-color); border-radius: 10px; outline: none; background: white; color: var(--text-dark);">
+        </div>
+        <div class="input-group"><label>Data:</label><input type="date" id="edit-data" value="${td}" style="width: 100%; border: 2px solid var(--border-color); border-radius: 10px; padding: 12px 16px; color: var(--text-dark); background: white; outline: none;"></div>
+        <div class="input-group"><label>Hora:</label><input type="time" id="edit-hora" value="${th}" style="width: 100%; border: 2px solid var(--border-color); border-radius: 10px; padding: 12px 16px; color: var(--text-dark); background: white; outline: none;"></div>
+        <div class="input-group"><label>Remetente:</label><input type="text" id="edit-remetente" value="${cartaAtualUnica.remetente}"></div>
+        <div class="input-group"><label>Destinatário:</label><input type="text" id="edit-destinatario" value="${cartaAtualUnica.destinatario}"></div>
+        <div class="input-group"><label>Mensagem:</label><textarea id="edit-texto">${pt}</textarea></div>
+    </div>`;
+    
+    // Ajustado os botões para ficarem centralizados e com o mesmo padrão
+    a.innerHTML=`<div style="display: flex; gap: 10px; width: 100%; max-width: 460px; margin: 0 auto;">
+        <button class="action-btn" style="background: var(--border-color); color: var(--text-dark);" onclick="openLetterContent(false, true)">Cancelar</button>
+        <button class="action-btn" onclick="saveSentLetter('${key}')">Salvar ✅</button>
+    </div>`;
 };
 
 window.saveSentLetter=(key)=>{
