@@ -73,84 +73,84 @@
         </div>
 
         <div class="main-interface" id="main-interface">
-          <nav class="tabs-menu">
-              <button class="tab-btn active" id="btn-novas" onclick="switchTab('novas')">
-                  <div class="tab-btn-content">
-                    <span>Novas Cartas</span>
-                    <span class="notification-badge" id="notif-badge"></span>
-                  </div>
-              </button>
-              <button class="tab-btn" id="btn-lidas" onclick="switchTab('lidas')">Lidas</button>
-              <button class="tab-btn" id="btn-escrever" onclick="switchTab('escrever')">Escrever Carta</button>
-              <button class="tab-btn" id="btn-enviadas" onclick="switchTab('enviadas')">Enviadas</button>
-          </nav>
+            <nav class="tabs-menu">
+                <button class="tab-btn active" id="btn-novas" onclick="switchTab('novas')">
+                    <div class="tab-btn-content">
+                        <span>Novas Cartas</span>
+                        <span class="notification-badge" id="notif-badge"></span>
+                    </div>
+                </button>
+                <button class="tab-btn" id="btn-lidas" onclick="switchTab('lidas')">Lidas</button>
+                <button class="tab-btn" id="btn-escrever" onclick="switchTab('escrever')">Escrever Carta</button>
+                <button class="tab-btn" id="btn-enviadas" onclick="switchTab('enviadas')">Enviadas</button>
+            </nav>
 
         <div class="tab-content-wrapper">
-          <section id="tab-novas" class="tab-content active">
+            <section id="tab-novas" class="tab-content active">
             <div id="envelope-display" class="archive-grid"></div>
-          </section>
-          
-          <section id="tab-lidas" class="tab-content">
-            <h2>Suas Memórias Guardadas 📁</h2>
-            <div class="archive-grid" id="lidas-display"></div>
-          </section>
-          
-          <section id="tab-escrever" class="tab-content">
-              <h2>Mande uma carta de volta ✏️</h2>
-              <div class="write-box">
-                  <div class="input-group">
-                      <label>Título da Carta:</label>
-                      <input type="text" id="letter-title" placeholder="Ex: Sobre o nosso dia...">
-                  </div>
-                  
-                  <div class="input-group" id="send-resp-group" style="display:none;">
-                      <label>Em resposta a:</label>
-                      <div style="display:flex; gap:10px;">
-                          <input type="text" id="send-resposta" disabled style="width:100%; border:2px solid var(--border-color); border-radius:10px; padding:12px; background:white; opacity:0.7; color:var(--text-dark);">
-                          <button onclick="document.getElementById('send-resposta').value=''; document.getElementById('send-resp-group').style.display='none';" style="background:#FF4B4B; color:white; border:none; border-radius:10px; cursor:pointer; padding:0 15px; font-weight:bold;">X</button>
-                      </div>
-                  </div>
+            </section>
 
-                  <div class="input-group">
-                      <label>Selo do Envelope:</label>
-                      <input type="text" id="send-selo" placeholder="Insira 1 emoji ✨" maxlength="2" style="width: 100%; text-align: center; font-size: 24px; padding: 10px; border: 2px solid var(--border-color); border-radius: 10px; outline: none; background: white; color: var(--text-dark);">
-                  </div>
+            <section id="tab-lidas" class="tab-content">
+                <h2>Suas Memórias Guardadas 📁</h2>
+                <div class="archive-grid" id="lidas-display"></div>
+            </section>
 
-                  <div class="input-group">
-                      <label>Data de Desbloqueio (Opcional):</label>
-                      <input type="date" id="send-date" style="width: 100%; border: 2px solid var(--border-color); border-radius: 10px; padding: 12px 16px; color: var(--text-dark); background: white; outline: none; font-size: 13px; font-family: inherit;">
-                  </div>
-                  
-                  <div class="checkbox-group" style="display: flex; align-items: center; margin-bottom: 15px; gap: 10px; cursor: pointer;">
-                      <input type="checkbox" id="send-has-time" onchange="toggleSendTimeInput()" style="width: auto;">
-                      <label for="send-has-time" style="margin: 0; cursor: pointer; color: var(--text-dark); font-size: 13px; font-weight: bold;">Definir um horário exato?</label>
-                  </div>
-                  
-                  <div class="input-group" id="send-time-group" style="display: none;">
-                      <label>Horário:</label>
-                      <input type="time" id="send-time" style="width: 100%; border: 2px solid var(--border-color); border-radius: 10px; padding: 12px 16px; color: var(--text-dark); background: white; outline: none; font-size: 13px; font-family: inherit;">
-                  </div>
-                  
-                  <div class="input-group">
-                      <label>Remetente:</label>
-                      <input type="text" id="sender-name" placeholder="Seu nome...">
-                  </div>
-                  <div class="input-group">
-                      <label>Destinatário:</label>
-                      <input type="text" id="recipient-name" placeholder="Para quem...">
-                  </div>
-                  <div class="input-group">
-                      <label>Mensagem:</label>
-                      <textarea id="write-text" placeholder="Escreva aqui..."></textarea>
-                  </div>
-                  <button class="action-btn" onclick="sendLetter()">Enviar para a Caixa 🚀</button>
-              </div>
-          </section>
-          
-          <section id="tab-enviadas" class="tab-content">
-              <h2>Suas Cartas Enviadas 📮</h2>
-              <div class="archive-grid" id="enviadas-display"></div>
-          </section>
+            <section id="tab-escrever" class="tab-content">
+                <h2>Mande uma carta de volta ✏️</h2>
+                <div class="write-box">
+                    <div class="input-group">
+                        <label>Título da Carta:</label>
+                        <input type="text" id="letter-title" placeholder="Ex: Sobre o nosso dia...">
+                    </div>
+                    
+                    <div class="input-group" id="send-resp-group" style="display:none;">
+                        <label>Em resposta a:</label>
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" id="send-resposta" disabled style="width:100%; border:2px solid var(--border-color); border-radius:10px; padding:12px; background:white; opacity:0.7; color:var(--text-dark);">
+                            <button onclick="document.getElementById('send-resposta').value=''; document.getElementById('send-resp-group').style.display='none';" style="background:#FF4B4B; color:white; border:none; border-radius:10px; cursor:pointer; padding:0 15px; font-weight:bold;">X</button>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Selo do Envelope:</label>
+                        <input type="text" id="send-selo" placeholder="Insira 1 emoji ✨" maxlength="2" style="width: 100%; text-align: center; font-size: 24px; padding: 10px; border: 2px solid var(--border-color); border-radius: 10px; outline: none; background: white; color: var(--text-dark);">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Data de Desbloqueio (Opcional):</label>
+                        <input type="date" id="send-date" style="width: 100%; border: 2px solid var(--border-color); border-radius: 10px; padding: 12px 16px; color: var(--text-dark); background: white; outline: none; font-size: 13px; font-family: inherit;">
+                    </div>
+                    
+                    <div class="checkbox-group" style="display: flex; align-items: center; margin-bottom: 15px; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="send-has-time" onchange="toggleSendTimeInput()" style="width: auto;">
+                        <label for="send-has-time" style="margin: 0; cursor: pointer; color: var(--text-dark); font-size: 13px; font-weight: bold;">Definir um horário exato?</label>
+                    </div>
+                    
+                    <div class="input-group" id="send-time-group" style="display: none;">
+                        <label>Horário:</label>
+                        <input type="time" id="send-time" style="width: 100%; border: 2px solid var(--border-color); border-radius: 10px; padding: 12px 16px; color: var(--text-dark); background: white; outline: none; font-size: 13px; font-family: inherit;">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Remetente:</label>
+                        <input type="text" id="sender-name" placeholder="Seu nome...">
+                    </div>
+                    <div class="input-group">
+                        <label>Destinatário:</label>
+                        <input type="text" id="recipient-name" placeholder="Para quem...">
+                    </div>
+                    <div class="input-group">
+                        <label>Mensagem:</label>
+                        <textarea id="write-text" placeholder="Escreva aqui..."></textarea>
+                    </div>
+                    <button class="action-btn" onclick="sendLetter()">Enviar para a Caixa 🚀</button>
+                </div>
+            </section>
+
+            <section id="tab-enviadas" class="tab-content">
+                <h2>Suas Cartas Enviadas 📮</h2>
+                <div class="archive-grid" id="enviadas-display"></div>
+            </section>
         </div>
         
     </div>

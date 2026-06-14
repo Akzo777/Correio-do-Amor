@@ -229,3 +229,18 @@ window.saveSentLetter=(key)=>{
 
 window.deleteSentLetter=(key)=>{ if(confirm("Apagar permanentemente?"))set(ref(db,`correio_dados/para_ele/${key}`),null).then(()=>closeLetterModal()); };
 window.switchTab=(n)=>{ document.querySelectorAll('.tab-content, .tab-btn').forEach(e=>e.classList.remove('active')); document.getElementById(`tab-${n}`).classList.add('active'); document.getElementById(`btn-${n}`).classList.add('active'); };
+
+
+window.responderDaCaixa = () => {
+    // 1. Fecha o modal da carta atual
+    closeLetterModal();
+    
+    // 2. Preenche o campo oculto "Em resposta a" com o título da carta que ela está respondendo
+    document.getElementById('send-resposta').value = cartaAtualUnica.titulo;
+    
+    // 3. Exibe o grupo do campo de resposta
+    document.getElementById('send-resp-group').style.display = 'flex';
+    
+    // 4. Navega para a aba de escrever
+    switchTab('escrever');
+};
