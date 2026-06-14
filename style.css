@@ -50,7 +50,47 @@ body { background: var(--bg-dark); display: flex; justify-content: center; align
 .click-prompt { margin-top: 185px; font-weight: bold; color: var(--pc4); text-align: center; animation: blink 1.5s infinite; font-size: 12px; }
 @keyframes blink { 50% { opacity: 0.3; } }
 
-.main-interface { width: 100%; background: var(--bg-light); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none; flex-direction: column; overflow: hidden; animation: slideUp 0.6s ease forwards; border: 1px solid var(--border-color); margin-top: 65px; margin-bottom: 20px; }
+/* 1. Mantenha o main-interface como o container flex, mas remova o overflow dele */
+.main-interface { 
+    width: 100%; 
+    background: var(--bg-light); 
+    border-radius: 16px; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+    display: none; 
+    flex-direction: column; 
+    border: 1px solid var(--border-color); 
+    margin-top: 45px; 
+    margin-bottom: 20px; 
+    max-height: 85vh; 
+    overflow: hidden; /* IMPORTANTE: Removemos o auto daqui */
+}
+
+/* 2. Adicione esta regra para fixar o menu no topo */
+.tabs-menu { 
+    display: flex; 
+    background: var(--pc1); 
+    border-bottom: 2px solid var(--pc3); 
+    position: sticky; /* Mantém fixo no topo */
+    top: 0; 
+    z-index: 10; 
+}
+
+/* 3. Adicione esta classe para a área de conteúdo rolável */
+.tab-content-wrapper {
+    flex: 1;
+    overflow-y: auto; /* A rolagem acontece SÓ aqui agora */
+    padding: 25px;
+}
+
+/* Customização da barra de rolagem (deixe igual à da carta) */
+.tab-content-wrapper::-webkit-scrollbar { width: 6px; }
+.tab-content-wrapper::-webkit-scrollbar-thumb { background: var(--pc4); border-radius: 10px; }
+
+/* Barra de rolagem padronizada com a do modal de carta */
+.main-interface::-webkit-scrollbar { width: 6px; margin-top: 10px; }
+.main-interface::-webkit-scrollbar-track { background: transparent; }
+.main-interface::-webkit-scrollbar-thumb { background: var(--pc4); border-radius: 10px; }
+.main-interface::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 .tabs-menu { display: flex; background: var(--pc1); border-bottom: 2px solid var(--pc3); }
@@ -62,8 +102,18 @@ body { background: var(--bg-dark); display: flex; justify-content: center; align
 .notification-badge.show { display: flex; align-items: center; justify-content: center; }
 @keyframes pulse-badge { 0% { box-shadow: 0 0 0 0 rgba(255, 75, 75, 0.7); } 100% { box-shadow: 0 0 0 5px rgba(255, 75, 75, 0); } }
 
-.tab-content { display: none; padding: 25px; min-height: 265px; }
+.tab-content { display: none; padding: 20px;}
 .tab-content.active { display: block; }
+.tab-content-wrapper {
+    flex: 1;
+    overflow-y: auto; /* O scroll acontece aqui */
+    max-height: calc(85vh - 55px); /* Altura total (85vh) menos a altura do menu */
+}
+
+.tab-content-wrapper::-webkit-scrollbar { width: 6px; }
+.tab-content-wrapper::-webkit-scrollbar-track { background: transparent; }
+.tab-content-wrapper::-webkit-scrollbar-thumb { background: var(--pc4); border-radius: 10px; }
+.tab-content-wrapper::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
 .letter-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 6, 44, 0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; padding: 20px; backdrop-filter: blur(4px); }
 .letter-overlay.active { display: flex; }

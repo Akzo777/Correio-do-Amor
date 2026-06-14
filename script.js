@@ -120,16 +120,18 @@ function typewriterEffect(id, html, cb) {
 
 window.openLetterContent=(isNew,isSent=false)=>{
     const o=document.getElementById('letter-overlay'), p=document.getElementById('paper-content'), a=document.getElementById('modal-actions-container');
-    const tc = (cartaAtualUnica.tema && cartaAtualUnica.tema !== 'default') ? 'theme-' + cartaAtualUnica.tema : '';    const loved=cartaAtualUnica.loved?'loved':'';
+    const tc = (cartaAtualUnica.tema && cartaAtualUnica.tema !== 'default') ? 'theme-' + cartaAtualUnica.tema : '';    
+    const loved=cartaAtualUnica.loved?'loved':'';
     let react=isSent?'':`<div class="reaction-container" id="reaction-box" style="display:${isNew?'none':'block'};"><button class="btn-suspiro ${loved}" onclick="darSuspiro(this)" title="Amei!">💖</button><p style="font-size:10px;opacity:0.7;">Deixe um suspiro</p></div>`;
+    let respHtml = cartaAtualUnica.resposta_a ? `<div class="header-item"><span class="header-label" style="width:75px;">Resposta:</span><span class="header-value" style="color: var(--pc4);">${cartaAtualUnica.resposta_a}</span></div>` : '';
     
-    // Aplicada a propriedade onclick="isTyping=false" no envelop todo para ela poder tocar e pular a animação.
-    p.innerHTML=`<div class="custom-purple-paper ${tc}" style="border-radius: 8px; padding: 10px; cursor: pointer;" onclick="isTyping=false;"><div class="letter-header"><div class="header-item"><span class="header-label">De:</span><span class="header-value">${cartaAtualUnica.remetente}</span></div><div class="header-item"><span class="header-label">Para:</span><span class="header-value">${cartaAtualUnica.destinatario}</span></div></div><div class="letter-body" id="letter-body-content"></div>${react}</div>`;
+    p.innerHTML=`<div class="custom-purple-paper ${tc}" style="border-radius: 8px; padding: 10px; cursor: pointer;" onclick="isTyping=false;"><div class="letter-header"><div class="header-item"><span class="header-label">De:</span><span class="header-value">${cartaAtualUnica.remetente}</span></div><div class="header-item"><span class="header-label">Para:</span><span class="header-value">${cartaAtualUnica.destinatario}</span></div>${respHtml}</div><div class="letter-body" id="letter-body-content"></div>${react}</div>`;
     a.innerHTML='';
-    if(isNew) a.innerHTML=`<button class="action-btn next-btn" id="btn-marcar-lida" onclick="progressLetter()" style="margin:0 auto;display:none;">Guardar com Carinho 📂</button>`;
+    if(isNew) a.innerHTML=`<div style="display:flex;gap:10px;width:100%;justify-content:center;"><button class="action-btn next-btn" id="btn-marcar-lida" onclick="progressLetter()" style="display:none;">Guardar 📂</button><button class="action-btn next-btn" id="btn-responder" onclick="responderDaCaixa()" style="display:none; background: var(--pc8);">Responder ✍️</button></div>`;
     else if(isSent) a.innerHTML=`<div style="display:flex;gap:10px;"><button class="action-btn" style="background:var(--pc3);color:var(--text-dark);" onclick="editSentLetter('${cartaAtualUnica.firebaseKey}')">Editar ✏️</button><button class="action-btn" style="background:#FF4B4B;" onclick="deleteSentLetter('${cartaAtualUnica.firebaseKey}')">Excluir 🗑️</button></div>`;
+    else a.innerHTML=`<div style="display:flex;gap:10px;width:100%;justify-content:center;"><button class="action-btn" onclick="responderDaCaixa()" style="background: var(--pc8);">Responder ✍️</button></div>`;
     o.classList.add('active');
-    if(isNew){ tocarMusica(0.6); typewriterEffect("letter-body-content",cartaAtualUnica.conteudo,()=>{ document.getElementById("btn-marcar-lida").style.display="block"; const rb=document.getElementById("reaction-box"); if(rb)rb.style.display="block"; }); }
+    if(isNew){ tocarMusica(0.6); typewriterEffect("letter-body-content",cartaAtualUnica.conteudo,()=>{ document.getElementById("btn-marcar-lida").style.display="block"; document.getElementById("btn-responder").style.display="block"; const rb=document.getElementById("reaction-box"); if(rb)rb.style.display="block"; }); }
     else { document.getElementById("letter-body-content").innerHTML=cartaAtualUnica.conteudo; }
 };
 
@@ -147,32 +149,33 @@ window.updateLidasUI=()=>{
 };
 
 window.sendLetter=()=>{
-    const t=document.getElementById('letter-title').value.trim(), s=document.getElementById('send-selo').value.trim()||"💌", nd=document.getElementById('send-date').value, nh=document.getElementById('send-has-time').checked?document.getElementById('send-time').value:"", r=document.getElementById('sender-name').value.trim(), d=document.getElementById('recipient-name').value.trim(), txt=document.getElementById('write-text').value.trim();
+    const t=document.getElementById('letter-title').value.trim(), 
+        s=document.getElementById('send-selo').value.trim()||"💌", 
+        nd=document.getElementById('send-date').value, 
+        nh=document.getElementById('send-has-time').checked?document.getElementById('send-time').value:"", 
+        r=document.getElementById('sender-name').value.trim(), 
+        d=document.getElementById('recipient-name').value.trim(), 
+        txt=document.getElementById('write-text').value.trim(),
+          resp=document.getElementById('send-resposta').value.trim(); // Captura a resposta
+
     if(!t||!r||!d||!txt)return alert("Preencha todos os campos!");
 
-    push(ref(db,'correio_dados/para_ele'),{id:Date.now(),titulo:t,remetente:r,destinatario:d,selo:s,data_abertura:nd,hora_abertura:nh,conteudo:txt.replace(/\n/g,'<br>')}).then(()=>{
-        
-        // --- INÍCIO DA INTEGRAÇÃO COM MAKE E ONESIGNAL DO PAINEL ---
-        let dataAgendadaDela = null;
-        if (nd) {
-            dataAgendadaDela = formatarDataOneSignal(nd, nh);
-        }
-
-        const webhookParaEle = "https://hook.us2.make.com/9xcn1j0hd7btzkadwqi0k7wlx4jeh818"; 
-
-        fetch(webhookParaEle, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-                titulo: t, 
-                data_agendada: dataAgendadaDela 
-            })
-        })
-        .then(() => console.log("Aviso enviado para o painel dele!"))
-        .catch(e => console.error("Erro no webhook:", e));
-        // --- FIM DA INTEGRAÇÃO ---
-
-        document.getElementById('letter-title').value=""; document.getElementById('sender-name').value=""; document.getElementById('recipient-name').value=""; document.getElementById('write-text').value=""; document.getElementById('send-selo').value=""; document.getElementById('send-date').value=""; document.getElementById('send-time').value=""; document.getElementById('send-has-time').checked=false; toggleSendTimeInput(); switchTab('enviadas');
+    push(ref(db,'correio_dados/para_ele'),{
+        id:Date.now(), titulo:t, remetente:r, destinatario:d, resposta_a:resp, selo:s, 
+        data_abertura:nd, hora_abertura:nh, conteudo:txt.replace(/\n/g,'<br>')
+    }).then(()=>{
+        let dataAgendadaDela = nd ? formatarDataOneSignal(nd, nh) : null;
+        fetch("https://hook.us2.make.com/9xcn1j0hd7btzkadwqi0k7wlx4jeh818", { 
+            method: "POST", headers: { "Content-Type": "application/json" }, 
+            body: JSON.stringify({ titulo: t, data_agendada: dataAgendadaDela }) 
+        });
+        document.getElementById('letter-title').value=""; 
+        document.getElementById('send-resposta').value=""; 
+        document.getElementById('send-resp-group').style.display='none';
+        document.getElementById('sender-name').value=""; document.getElementById('recipient-name').value=""; 
+        document.getElementById('write-text').value=""; document.getElementById('send-selo').value=""; 
+        document.getElementById('send-date').value=""; document.getElementById('send-time').value=""; 
+        document.getElementById('send-has-time').checked=false; toggleSendTimeInput(); switchTab('enviadas');
     }).catch(e=>alert("Erro: "+e.message));
 };
 
@@ -198,8 +201,14 @@ window.editSentLetter=(key)=>{
             <label>Selo:</label>
             <input type="text" id="edit-selo" value="${cartaAtualUnica.selo||'💌'}" maxlength="2" style="width: 100%; text-align: center; font-size: 24px; padding: 10px; border: 2px solid var(--border-color); border-radius: 10px; outline: none; background: white; color: var(--text-dark);">
         </div>
-        <div class="input-group"><label>Data:</label><input type="date" id="edit-data" value="${td}" style="width: 100%; border: 2px solid var(--border-color); border-radius: 10px; padding: 12px 16px; color: var(--text-dark); background: white; outline: none;"></div>
-        <div class="input-group"><label>Hora:</label><input type="time" id="edit-hora" value="${th}" style="width: 100%; border: 2px solid var(--border-color); border-radius: 10px; padding: 12px 16px; color: var(--text-dark); background: white; outline: none;"></div>
+        <div class="input-group">
+    <label>Data:</label>
+    <input type="date" id="edit-data" value="${td}" style="width: 100%; border: 2px solid var(--border-color); border-radius: 10px; padding: 12px 16px; color: var(--text-dark); background: white; outline: none; font-size: 13px; font-family: inherit;">
+</div>
+<div class="input-group">
+    <label>Hora:</label>
+    <input type="time" id="edit-hora" value="${th}" style="width: 100%; border: 2px solid var(--border-color); border-radius: 10px; padding: 12px 16px; color: var(--text-dark); background: white; outline: none; font-size: 13px; font-family: inherit;">
+</div>
         <div class="input-group"><label>Remetente:</label><input type="text" id="edit-remetente" value="${cartaAtualUnica.remetente}"></div>
         <div class="input-group"><label>Destinatário:</label><input type="text" id="edit-destinatario" value="${cartaAtualUnica.destinatario}"></div>
         <div class="input-group"><label>Mensagem:</label><textarea id="edit-texto">${pt}</textarea></div>

@@ -1,174 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Correio do Amor</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Correio do Amor</title>
 
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💌</text></svg>">
-  <link rel="manifest" href="manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Correio">
-  <link rel="apple-touch-icon" href="icone.png">
-  <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💌</text></svg>">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Correio">
+    <link rel="apple-touch-icon" href="icone.png">
+    <link rel="stylesheet" href="style.css">
 
-
-<!-- OneSignal SDK Integrado -->
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-  <script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-      await OneSignal.init({
-        appId: "ab98337c-1b29-4909-981e-9fe50b388cd1",
-        safari_web_id: "web.onesignal.auto.5b1b15a7-d107-41ff-b02e-c379c8847bd2",
-        notifyButton: {
-          enable: true, 
-        },
-        welcomeNotification: {
-          title: "Correio do Amor",
-          message: "Olá, minha gatinha, escrevi uma carta nova para você!! <3",
-        },
-        // --- O CAMINHO RELATIVO CORRETO ---
-        serviceWorkerParam: { scope: '/Correio-do-Amor/' },
-        serviceWorkerPath: 'Correio-do-Amor/OneSignalSDKWorker.js'
-      });
-    });
-  </script>
+    <!-- OneSignal SDK Integrado -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: "ab98337c-1b29-4909-981e-9fe50b388cd1",
+                safari_web_id: "web.onesignal.auto.5b1b15a7-d107-41ff-b02e-c379c8847bd2",
+                notifyButton: { enable: true },
+                welcomeNotification: {
+                    title: "Correio do Amor",
+                    message: "Olá, minha gatinha, agora você receberá notificação das minhas cartinhas<3",
+                },
+                serviceWorkerParam: { scope: '/Correio-do-Amor/' },
+                serviceWorkerPath: '/Correio-do-Amor/OneSignalSDKWorker.js'
+            });
+        });
+    </script>
 </head>
 
 <body>
+    <script src="senha-global.js" data-foto="1"></script>
 
-  <script src="senha-global.js" data-foto="1"></script>
+    <div class="app-container">
+        <button class="close-box-btn" id="close-box-btn" onclick="closeMailbox()">Fechar Caixa 📂</button>
+        
+        <div class="scene" id="scene">
+            <div class="mailbox-camera-control" id="mailbox" onclick="handleMailboxClick(event)">
+                <div class="mailbox-tunnel-body">
+                    <div class="mailbox-interior-shadow"></div>
+                    <div class="mailbox-flag-stick">
+                        <div class="mailbox-flag-cloth"></div>
+                    </div>
+                </div>
+                <div class="mailbox-door-front" id="mailbox-door">
+                    <div class="mailbox-door-handle"></div>
+                    <div class="mailbox-door-text">CORREIO DO AMOR</div>
+                </div>
+                <div class="letters-inside-box" id="letters-inside">
+                    <div class="mini-envelope-physical env-1"><div class="flap-triangle"></div></div>
+                    <div class="mini-envelope-physical env-2"><div class="flap-triangle"></div></div>
+                    <div class="mini-envelope-physical env-3"><div class="flap-triangle"></div></div>
+                </div>
+                <div class="mailbox-wood-pole"><div class="wood-grain-line"></div></div>
+                <div class="mailbox-grass-base">
+                    <div class="grass-blade g1"></div><div class="grass-blade g2"></div><div class="grass-blade g3"></div>
+                </div>
+                <div class="magic-particles">
+                    <div class="particle p1"></div>
+                    <div class="particle p2"></div>
+                    <div class="particle p3"></div>
+                    <div class="particle p4"></div>
+                    <div class="particle p5"></div>
+                    <div class="particle p6"></div>
+                </div>
+            </div>
+            <div class="click-prompt" id="prompt">Clique na Caixa de Correio para Abrir 📬</div>
+        </div>
 
-  <div class="app-container">
-    <button class="close-box-btn" id="close-box-btn" onclick="closeMailbox()">Fechar Caixa 📂</button>
-    
-    <div class="scene" id="scene">
-      <div class="mailbox-camera-control" id="mailbox" onclick="handleMailboxClick(event)">
-        <div class="mailbox-tunnel-body">
-          <div class="mailbox-interior-shadow"></div>
-          <div class="mailbox-flag-stick">
-            <div class="mailbox-flag-cloth"></div>
-          </div>
-        </div>
-        <div class="mailbox-door-front" id="mailbox-door">
-          <div class="mailbox-door-handle"></div>
-          <div class="mailbox-door-text">CORREIO DO AMOR</div>
-        </div>
-        <div class="letters-inside-box" id="letters-inside">
-          <div class="mini-envelope-physical env-1"><div class="flap-triangle"></div></div>
-          <div class="mini-envelope-physical env-2"><div class="flap-triangle"></div></div>
-          <div class="mini-envelope-physical env-3"><div class="flap-triangle"></div></div>
-        </div>
-        <div class="mailbox-wood-pole"><div class="wood-grain-line"></div></div>
-        <div class="mailbox-grass-base">
-          <div class="grass-blade g1"></div><div class="grass-blade g2"></div><div class="grass-blade g3"></div>
-        </div>
-        <div class="magic-particles">
-          <div class="particle p1"></div>
-          <div class="particle p2"></div>
-          <div class="particle p3"></div>
-          <div class="particle p4"></div>
-          <div class="particle p5"></div>
-          <div class="particle p6"></div>
+        <div class="main-interface" id="main-interface">
+          <nav class="tabs-menu">
+              <button class="tab-btn active" id="btn-novas" onclick="switchTab('novas')">
+                  <div class="tab-btn-content">
+                    <span>Novas Cartas</span>
+                    <span class="notification-badge" id="notif-badge"></span>
+                  </div>
+              </button>
+              <button class="tab-btn" id="btn-lidas" onclick="switchTab('lidas')">Lidas</button>
+              <button class="tab-btn" id="btn-escrever" onclick="switchTab('escrever')">Escrever Carta</button>
+              <button class="tab-btn" id="btn-enviadas" onclick="switchTab('enviadas')">Enviadas</button>
+          </nav>
+
+        <div class="tab-content-wrapper">
+          <section id="tab-novas" class="tab-content active">
+            <div id="envelope-display" class="archive-grid"></div>
+          </section>
+          
+          <section id="tab-lidas" class="tab-content">
+            <h2>Suas Memórias Guardadas 📁</h2>
+            <div class="archive-grid" id="lidas-display"></div>
+          </section>
+          
+          <section id="tab-escrever" class="tab-content">
+              <h2>Mande uma carta de volta ✏️</h2>
+              <div class="write-box">
+                  <div class="input-group">
+                      <label>Título da Carta:</label>
+                      <input type="text" id="letter-title" placeholder="Ex: Sobre o nosso dia...">
+                  </div>
+                  
+                  <div class="input-group" id="send-resp-group" style="display:none;">
+                      <label>Em resposta a:</label>
+                      <div style="display:flex; gap:10px;">
+                          <input type="text" id="send-resposta" disabled style="width:100%; border:2px solid var(--border-color); border-radius:10px; padding:12px; background:white; opacity:0.7; color:var(--text-dark);">
+                          <button onclick="document.getElementById('send-resposta').value=''; document.getElementById('send-resp-group').style.display='none';" style="background:#FF4B4B; color:white; border:none; border-radius:10px; cursor:pointer; padding:0 15px; font-weight:bold;">X</button>
+                      </div>
+                  </div>
+
+                  <div class="input-group">
+                      <label>Selo do Envelope:</label>
+                      <input type="text" id="send-selo" placeholder="Insira 1 emoji ✨" maxlength="2" style="width: 100%; text-align: center; font-size: 24px; padding: 10px; border: 2px solid var(--border-color); border-radius: 10px; outline: none; background: white; color: var(--text-dark);">
+                  </div>
+
+                  <div class="input-group">
+                      <label>Data de Desbloqueio (Opcional):</label>
+                      <input type="date" id="send-date" style="width: 100%; border: 2px solid var(--border-color); border-radius: 10px; padding: 12px 16px; color: var(--text-dark); background: white; outline: none; font-size: 13px; font-family: inherit;">
+                  </div>
+                  
+                  <div class="checkbox-group" style="display: flex; align-items: center; margin-bottom: 15px; gap: 10px; cursor: pointer;">
+                      <input type="checkbox" id="send-has-time" onchange="toggleSendTimeInput()" style="width: auto;">
+                      <label for="send-has-time" style="margin: 0; cursor: pointer; color: var(--text-dark); font-size: 13px; font-weight: bold;">Definir um horário exato?</label>
+                  </div>
+                  
+                  <div class="input-group" id="send-time-group" style="display: none;">
+                      <label>Horário:</label>
+                      <input type="time" id="send-time" style="width: 100%; border: 2px solid var(--border-color); border-radius: 10px; padding: 12px 16px; color: var(--text-dark); background: white; outline: none; font-size: 13px; font-family: inherit;">
+                  </div>
+                  
+                  <div class="input-group">
+                      <label>Remetente:</label>
+                      <input type="text" id="sender-name" placeholder="Seu nome...">
+                  </div>
+                  <div class="input-group">
+                      <label>Destinatário:</label>
+                      <input type="text" id="recipient-name" placeholder="Para quem...">
+                  </div>
+                  <div class="input-group">
+                      <label>Mensagem:</label>
+                      <textarea id="write-text" placeholder="Escreva aqui..."></textarea>
+                  </div>
+                  <button class="action-btn" onclick="sendLetter()">Enviar para a Caixa 🚀</button>
+              </div>
+          </section>
+          
+          <section id="tab-enviadas" class="tab-content">
+              <h2>Suas Cartas Enviadas 📮</h2>
+              <div class="archive-grid" id="enviadas-display"></div>
+          </section>
         </div>
         
-      </div>
-      <div class="click-prompt" id="prompt">Clique na Caixa de Correio para Abrir 📬</div>
     </div>
 
-    <div class="main-interface" id="main-interface">
-      <nav class="tabs-menu">
-        <button class="tab-btn active" id="btn-novas" onclick="switchTab('novas')">
-          <div class="tab-btn-content">
-            <span>Novas Cartas</span>
-            <span class="notification-badge" id="notif-badge"></span>
-          </div>
-        </button>
-        <button class="tab-btn" id="btn-lidas" onclick="switchTab('lidas')">Lidas</button>
-        <button class="tab-btn" id="btn-escrever" onclick="switchTab('escrever')">Escrever Carta</button>
-        <button class="tab-btn" id="btn-enviadas" onclick="switchTab('enviadas')">Enviadas</button>
-      </nav>
-
-      <section id="tab-novas" class="tab-content active">
-        <div id="envelope-display" class="archive-grid"></div>
-      </section>
-      
-      <section id="tab-lidas" class="tab-content">
-        <h2>Suas Memórias Guardadas 📁</h2>
-        <div class="archive-grid" id="lidas-display"></div>
-      </section>
-      
-      <section id="tab-escrever" class="tab-content">
-        <h2>Mande uma carta de volta ✏️</h2>
-        <div class="write-box">
-          <div class="input-group">
-            <label>Título da Carta:</label>
-            <input type="text" id="letter-title" placeholder="Ex: Sobre o nosso dia...">
-          </div>
-          <div class="input-group">
-            <label>Selo do Envelope:</label>
-            <input type="text" id="send-selo" placeholder="Insira 1 emoji ✨" maxlength="2" style="width: 100%; text-align: center; font-size: 24px; padding: 10px; border: 2px solid var(--border-color); border-radius: 10px; outline: none; background: white; color: var(--text-dark); transition: 0.2s;">
-            <small style="color: var(--pc6); margin-top: 5px; font-size: 11px; text-align: center;">Use o teclado do seu celular para colocar a sua marca!</small>
-          </div>
-
-          <div class="input-group">
-            <label>Data de Desbloqueio (Opcional):</label>
-            <input type="date" id="send-date" style="width: 100%; border: 2px solid var(--border-color); border-radius: 10px; padding: 12px 16px; color: var(--text-dark); background: white; outline: none;">
-            <small style="color: var(--pc6); margin-top: 5px; font-size: 11px;">Datas no futuro trancarão a carta 🔒.</small>
-          </div>
-          <div class="checkbox-group" style="display: flex; align-items: center; margin-bottom: 15px; gap: 10px; cursor: pointer;">
-            <input type="checkbox" id="send-has-time" onchange="toggleSendTimeInput()" style="width: auto;">
-            <label for="send-has-time" style="margin: 0; cursor: pointer; color: var(--text-dark); font-size: 13px; font-weight: bold;">Definir um horário exato?</label>
-          </div>
-          <div class="input-group" id="send-time-group" style="display: none;">
-            <label>Horário:</label>
-            <input type="time" id="send-time" style="width: 100%; border: 2px solid var(--border-color); border-radius: 10px; padding: 12px 16px; color: var(--text-dark); background: white; outline: none;">
-          </div>
-          <div class="input-group">
-            <label>Remetente:</label>
-            <input type="text" id="sender-name" placeholder="Seu nome...">
-          </div>
-          <div class="input-group">
-            <label>Destinatário:</label>
-            <input type="text" id="recipient-name" placeholder="Para quem...">
-          </div>
-          <div class="input-group">
-            <label>Mensagem:</label>
-            <textarea id="write-text" placeholder="Escreva aqui..."></textarea>
-          </div>
-          <button class="action-btn" onclick="sendLetter()">Enviar para a Caixa 🚀</button>
+    <div class="letter-overlay" id="letter-overlay">
+        <div class="paper-container">
+            <span class="close-letter-btn" onclick="closeLetterModal()">&times;</span>
+            <div class="paper" id="paper-content"></div>
+            <div id="modal-actions-container" style="margin-top: 15px;"></div>
         </div>
-      </section>
-      
-      <section id="tab-enviadas" class="tab-content">
-        <h2>Suas Cartas Enviadas 📮</h2>
-        <div class="archive-grid" id="enviadas-display"></div>
-      </section>
     </div>
-  </div>
 
-  <div class="letter-overlay" id="letter-overlay">
-    <div class="paper-container">
-      <span class="close-letter-btn" onclick="closeLetterModal()">&times;</span>
-      <div class="paper" id="paper-content"></div>
-      <div id="modal-actions-container" style="margin-top: 15px;"></div>
+    <div class="alert-overlay" id="custom-alert-modal">
+        <div class="alert-content">
+            <div class="alert-icon" id="alert-icon">⚠️</div>
+            <h2 class="alert-title" id="alert-title">Aviso</h2>
+            <p class="alert-msg" id="alert-message"></p>
+            <button class="action-btn" onclick="closeAlertModal()" style="margin: 0 auto;">Entendi</button>
+        </div>
     </div>
-  </div>
 
-  <div class="alert-overlay" id="custom-alert-modal">
-    <div class="alert-content">
-      <div class="alert-icon" id="alert-icon">⚠️</div>
-      <h2 class="alert-title" id="alert-title">Aviso</h2>
-      <p class="alert-msg" id="alert-message"></p>
-      <button class="action-btn" onclick="closeAlertModal()" style="margin: 0 auto;">Entendi</button>
-    </div>
-  </div>
+    <audio id="bg-music" loop preload="auto">
+        <source src="https://cdn.jsdelivr.net/gh/Akzo777/Correio-do-Amor/Heaven.mp3" type="audio/mpeg">
+    </audio>
+    <button id="music-control" class="music-btn" onclick="toggleMusic()">🔊</button>
 
-  <audio id="bg-music" loop preload="auto">
-    <source src="https://cdn.jsdelivr.net/gh/Akzo777/Correio-do-Amor/Heaven.mp3" type="audio/mpeg">
-  </audio>
-  <button id="music-control" class="music-btn" onclick="toggleMusic()">🔊</button>
-
-  <script type="module" src="script.js"></script>  
+    <script type="module" src="script.js"></script>  
 </body>
 </html>
