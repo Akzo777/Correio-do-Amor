@@ -43,7 +43,19 @@ window.handleMailboxClick = () => {
 function tocarMusica(v=0.5){ const m=document.getElementById('bg-music'); if(m&&!hasPlayedMusic){ m.volume=v; m.play().then(()=>hasPlayedMusic=true).catch(e=>console.log("Audio blk")); } }
 window.toggleMusic=()=>{ const m=document.getElementById('bg-music'), b=document.getElementById('music-control'); if(m.paused){m.play();b.innerHTML="🔊";}else{m.pause();b.innerHTML="🔇";} };
 window.closeMailbox=()=>{ document.getElementById('main-interface').style.display='none'; document.getElementById('scene').classList.remove('vanish','open-door-state'); document.getElementById('prompt').innerHTML="Clique na Caixa para Abrir 📬"; document.getElementById('close-box-btn').classList.remove('visible'); };
+
+// Função auxiliar para datas simples (UI)
 function formatarDataHora(d,h){ if(!d)return""; const p=d.split('-'); let s=`${p[2]}/${p[1]}/${p[0]}`; if(h)s+=` às ${h}`; return s; }
+
+// --- NOVA FUNÇÃO: Formatar data para a API do OneSignal ---
+function formatarDataOneSignal(dataStr, horaStr) {
+    const dataAlvo = new Date(`${dataStr}T${horaStr || "00:00"}:00`);
+    const pad = (n) => n < 10 ? '0' + n : n;
+    const YYYY = dataAlvo.getFullYear(), MM = pad(dataAlvo.getMonth() + 1), DD = pad(dataAlvo.getDate()), HH = pad(dataAlvo.getHours()), mm = pad(dataAlvo.getMinutes()), ss = pad(dataAlvo.getSeconds());
+    const offset = -dataAlvo.getTimezoneOffset(); const sign = offset >= 0 ? '+' : '-'; const offH = pad(Math.floor(Math.abs(offset) / 60)); const offM = pad(Math.abs(offset) % 60); const timezone = `GMT${sign}${offH}${offM}`;
+    return `${YYYY}-${MM}-${DD} ${HH}:${mm}:${ss} ${timezone}`;
+}
+
 window.showCustomAlert=(t,m,i="⚠️")=>{ const a=document.getElementById('custom-alert-modal'); if(!a)return alert(t+"\n"+m.replace(/<[^>]*>?/gm,'')); document.getElementById('alert-icon').innerText=i; document.getElementById('alert-title').innerText=t; document.getElementById('alert-message').innerHTML=m; a.classList.add('active'); };
 window.closeAlertModal=()=>{ document.getElementById('custom-alert-modal').classList.remove('active'); };
 window.toggleSendTimeInput=()=>{ const h=document.getElementById('send-has-time').checked; document.getElementById('send-time-group').style.display=h?'flex':'none'; if(!h)document.getElementById('send-time').value=""; };
@@ -129,7 +141,29 @@ window.updateLidasUI=()=>{
 window.sendLetter=()=>{
     const t=document.getElementById('letter-title').value.trim(), s=document.getElementById('send-selo').value.trim()||"💌", nd=document.getElementById('send-date').value, nh=document.getElementById('send-has-time').checked?document.getElementById('send-time').value:"", r=document.getElementById('sender-name').value.trim(), d=document.getElementById('recipient-name').value.trim(), txt=document.getElementById('write-text').value.trim();
     if(!t||!r||!d||!txt)return alert("Preencha todos os campos!");
+
     push(ref(db,'correio_dados/para_ele'),{id:Date.now(),titulo:t,remetente:r,destinatario:d,selo:s,data_abertura:nd,hora_abertura:nh,conteudo:txt.replace(/\n/g,'<br>')}).then(()=>{
+        
+        // --- INÍCIO DA INTEGRAÇÃO COM MAKE E ONESIGNAL DO PAINEL ---
+        let dataAgendadaDela = null;
+        if (nd) {
+            dataAgendadaDela = formatarDataOneSignal(nd, nh);
+        }
+
+        const webhookParaEle = "https://hook.us2.make.com/9xcn1j0hd7btzkadwqi0k7wlx4jeh818"; 
+
+        fetch(webhookParaEle, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                titulo: t, 
+                data_agendada: dataAgendadaDela 
+            })
+        })
+        .then(() => console.log("Aviso enviado para o painel dele!"))
+        .catch(e => console.error("Erro no webhook:", e));
+        // --- FIM DA INTEGRAÇÃO ---
+
         document.getElementById('letter-title').value=""; document.getElementById('sender-name').value=""; document.getElementById('recipient-name').value=""; document.getElementById('write-text').value=""; document.getElementById('send-selo').value=""; document.getElementById('send-date').value=""; document.getElementById('send-time').value=""; document.getElementById('send-has-time').checked=false; toggleSendTimeInput(); switchTab('enviadas');
     }).catch(e=>alert("Erro: "+e.message));
 };
